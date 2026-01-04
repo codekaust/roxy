@@ -12,10 +12,7 @@ class ConversationalAgent: ObservableObject {
     let sttManager = STTManager()
     private let ttsManager = TTSManager.shared
     private let perception = Perception()
-    private let llmClient = VoiceGeminiApi(
-        modelName: "gemini-3-flash-preview",
-        apiKey: "AIzaSyBAPzvrfZF0_aPS7FkoynkdxmuP_cQcwWc"
-    )
+    private let llmClient: VoiceGeminiApi
     
     // The "Task Executor" Agent
     private let taskAgentState = AgentState()
@@ -32,6 +29,12 @@ class ConversationalAgent: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     init() {
+        // Initialize LLM client with API key from ConfigurationManager
+        let apiKey = ConfigurationManager.shared.getAPIKey(for: .geminiLLM) ?? ""
+        self.llmClient = VoiceGeminiApi(
+            modelName: "gemini-3-flash-preview",
+            apiKey: apiKey
+        )
         initializeConversation()
     }
     

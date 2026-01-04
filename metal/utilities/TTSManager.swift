@@ -5,7 +5,6 @@ import CryptoKit
 class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAudioPlayerDelegate {
 
     static let shared = TTSManager()
-    private let googleApiKey = "AIzaSyBAPzvrfZF0_aPS7FkoynkdxmuP_cQcwWc"
 
     // --- Configuration ---
     @Published var useCloudTTS: Bool {
@@ -40,6 +39,9 @@ class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAud
     func speak(_ text: String) async {
         stop() // Stop existing playback
         stopRequested = false
+
+        let googleApiKey = ConfigurationManager.shared.getAPIKey(for: .googleTTS) ?? ""
+
         // --- 🔍 DEBUG START 🔍 ---
         print("--------------------------------------------------")
         print("TTS DEBUG: Cloud Enabled = \(useCloudTTS)")
@@ -47,10 +49,10 @@ class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAud
         print("TTS DEBUG: API Key Start  = \(googleApiKey.prefix(6))...")
         // -------------------------------------------------------
         if useCloudTTS && !googleApiKey.isEmpty {
-            print("Speaking using the clouf TTS engine...")
-            await speakCloud(text)
+            print("Speaking using the cloud TTS engine...")
+            await speakCloud(text, apiKey: googleApiKey)
         } else {
-            print("Speaking natibly... using the built-in macOS TTS engine...")
+            print("Speaking natively... using the built-in macOS TTS engine...")
             await speakNative(text)
         }
     }
@@ -152,8 +154,8 @@ class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAud
     }
     
     // MARK: - Cloud Logic (Smart Queue)
-    
-    private func speakCloud(_ text: String) async {
+
+    private func speakCloud(_ text: String, apiKey: String) async {
         let chunks = chunkTextIntoSentences(text: text, maxWordsPerChunk: 50)
         if chunks.isEmpty { return }
         print("TTS: (speakCloud) Chunks Count = \(chunks.count)")
@@ -163,19 +165,19 @@ class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAud
         await MainActor.run {
             self.currentCaptionId = OverlayManager.shared.showCaption(text: firstChunk)
         }
-        
-        guard let firstAudio = await getAudioData(text: firstChunk) else {
+
+        guard let firstAudio = await getAudioData(text: firstChunk, apiKey: apiKey) else {
             print("TTS: Failed to get first chunk, falling back to native.")
             await speakNative(text)
             return
         }
-        
+
         // 2. Start Background Prefetch
         let queue = AsyncQueue<Data>()
         Task.detached { [weak self] in
             for i in 1..<chunks.count {
                 if self?.stopRequested == true { break }
-                if let audio = await self?.getAudioData(text: chunks[i]) {
+                if let audio = await self?.getAudioData(text: chunks[i], apiKey: apiKey) {
                     await queue.enqueue(audio)
                 }
             }
@@ -235,16 +237,16 @@ class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAud
     }
     
     // MARK: - Networking & Caching
-    
-    private func getAudioData(text: String) async -> Data? {
+
+    private func getAudioData(text: String, apiKey: String) async -> Data? {
         if let cached = loadFromCache(text: text) { return cached }
-        guard let data = await fetchGoogleTTS(text: text) else { return nil }
+        guard let data = await fetchGoogleTTS(text: text, apiKey: apiKey) else { return nil }
         saveToCache(text: text, data: data)
         return data
     }
-    
-    private func fetchGoogleTTS(text: String) async -> Data? {
-        let urlString = "https://texttospeech.googleapis.com/v1/text:synthesize?key=\(googleApiKey)"
+
+    private func fetchGoogleTTS(text: String, apiKey: String) async -> Data? {
+        let urlString = "https://texttospeech.googleapis.com/v1/text:synthesize?key=\(apiKey)"
         guard let url = URL(string: urlString) else { return nil }
         print("TTS: (fetchGoogleTTS) URL = \(urlString)")
         

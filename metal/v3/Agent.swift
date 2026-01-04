@@ -9,12 +9,8 @@ class Agent {
     private let actionExecutor: ActionExecutor
     private let fileSystem: FileSystem
     
-    // We need an LLM Client
-    // TODO: Move API key to secure storage or Settings
-    private let llmClient = GeminiApi(
-        modelName: "gemini-3-flash-preview",
-        apiKey: "AIzaSyBAPzvrfZF0_aPS7FkoynkdxmuP_cQcwWc"
-    )
+    // LLM Client
+    private let llmClient: GeminiApi
     
     // Observable State (Published to SwiftUI)
     private var state: AgentState
@@ -25,8 +21,14 @@ class Agent {
         self.settings = AgentSettings()
         self.perception = Perception()
         self.fileSystem = FileSystem()
-        // We initialize actionExecutor with the real input manager
         self.actionExecutor = ActionExecutor()
+
+        // Initialize LLM client with API key from ConfigurationManager
+        let apiKey = ConfigurationManager.shared.getAPIKey(for: .geminiLLM) ?? ""
+        self.llmClient = GeminiApi(
+            modelName: "gemini-3-flash-preview",
+            apiKey: apiKey
+        )
     }
     
     func start(task: String) {
