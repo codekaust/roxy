@@ -37,7 +37,7 @@ class VoiceGeminiApi {
     private let session: URLSession
     private let decoder: JSONDecoder
     
-    init(modelName: String = "gemini-2.5-flash", maxRetry: Int = 2) {
+    init(modelName: String = "gemini-3-flash-preview", maxRetry: Int = 3) {
         self.modelName = modelName
         self.maxRetry = maxRetry
         

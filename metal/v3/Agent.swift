@@ -17,7 +17,7 @@ class Agent {
     private let fileSystem: FileSystem
     
     // We need an LLM Client (Placeholder for now)
-    private let llmClient = GeminiApi(modelName: "gemini-2.5-flash") // Replace with real Gemini/OpenAI client
+    private let llmClient = GeminiApi(modelName: "gemini-3-flash-preview") // Replace with real Gemini/OpenAI client
     
     // Observable State (Published to SwiftUI)
     private var state: AgentState
@@ -67,7 +67,7 @@ class Agent {
         while !state.stopped && state.nSteps < maxSteps {
             
             // A. SENSE
-            print("👀 Sensing...")
+            LogManager.shared.sensing("Sensing...")
             let screenAnalysis = await perception.analyze()
             await OverlayManager.shared.update(elements: screenAnalysis.elements)
             // B. THINK (Prepare)
@@ -85,12 +85,12 @@ class Agent {
             let geminiMessages = rawMessages.map(GeminiMessage.init)
             
             // C. THINK (Call LLM)
-            print("🤔 Thinking...")
+            LogManager.shared.thinking("Thinking...")
             // Ensure UI updates regarding thinking happen on main thread
             DispatchQueue.main.async { self.state.paused = true } // Just reusing 'paused' as 'busy' indicator if needed
-            
+
             guard let agentOutput = await llmClient.generateAgentOutput(messages: geminiMessages) else {
-                print("❌ LLM Failure")
+                LogManager.shared.error("LLM Failure")
                 state.consecutiveFailures += 1
                 if state.consecutiveFailures > 3 { break }
                 try? await Task.sleep(nanoseconds: 2 * 1_000_000_000)
@@ -103,23 +103,23 @@ class Agent {
                 self.state.lastModelOutput = agentOutput
                 self.state.paused = false
             }
-            
-            print("🤖 Goal: \(agentOutput.nextGoal ?? "Unknown")")
-            
+
+            LogManager.shared.goal("Goal: \(agentOutput.nextGoal ?? "Unknown")")
+
             // D. ACT
-            print("⚡️ Acting...")
+            LogManager.shared.acting("Acting...")
             var results: [ActionResult] = []
-            
+
             for action in agentOutput.action {
                 let res = await actionExecutor.execute(action: action, screenAnalysis: screenAnalysis, fileSystem: fileSystem)
                 results.append(res)
 
-                print("  -> \(res.longTermMemory ?? res.error ?? "Done")")
-                
+                LogManager.shared.info("  -> \(res.longTermMemory ?? res.error ?? "Done")")
+
                 if res.error != nil { break } // Stop step on error
                 if res.isDone == true {
                     DispatchQueue.main.async { self.state.stopped = true }
-                    print("✅ Task Done!")
+                    LogManager.shared.success("Task Done!")
                 }
             }
             
@@ -132,8 +132,8 @@ class Agent {
             try? await Task.sleep(nanoseconds: 1 * 1_000_000_000)
         }
         await OverlayManager.shared.clear()
-        print("--- Agent Stopped ---")
-        
+        LogManager.shared.info("--- Agent Stopped ---")
+
     }
 }
 

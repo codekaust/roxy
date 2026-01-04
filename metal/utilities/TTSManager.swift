@@ -12,7 +12,7 @@ import CryptoKit
 class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAudioPlayerDelegate {
     
     static let shared = TTSManager()
-    private let defaultApiKey = "AIzaSyBNbLbAEiBwJ5wUAroXJAAN0lhoHicVYjs"
+    private let defaultApiKey = "AIzaSyD5nftGCHxOFTAC08TJFQ-kR7JSOw5UgE0"
     // --- Configuration ---
     @Published var useCloudTTS: Bool {
         didSet { UserDefaults.standard.set(useCloudTTS, forKey: "useCloudTTS") }

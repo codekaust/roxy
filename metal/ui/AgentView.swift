@@ -3,17 +3,20 @@ import SwiftUI
 struct AgentView: View {
     // 1. Existing Shared State for the Task Agent
     @StateObject private var agentState = AgentState()
-    
+
     // 2. NEW: The Voice Agent
     @EnvironmentObject var voiceAgent: ConversationalAgent
-    
+
     // 3. Persistence & Text Input
     @AppStorage("lastTask") private var lastTask: String = ""
     @State private var taskInput: String = ""
-    
+
     // 4. Agent Reference (Lazy init)
     @State private var agent: Agent?
     @State private var isAgentInitialized = false
+
+    // 5. Log Manager (for displaying logs)
+    @ObservedObject private var logManager = LogManager.shared
     
     var body: some View {
         VStack(spacing: 16) {
@@ -24,7 +27,7 @@ struct AgentView: View {
                     .font(.title2)
                     .fontWeight(.bold)
                 Spacer()
-                
+
                 // STATUS INDICATOR
                 if voiceAgent.isThinking {
                     Text("Thinking...")
@@ -37,6 +40,18 @@ struct AgentView: View {
                         .font(.caption)
                         .lineLimit(1)
                         .truncationMode(.tail)
+                }
+
+                // Clear Logs Button
+                if !logManager.logs.isEmpty {
+                    Button {
+                        logManager.clear()
+                    } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Clear Logs")
                 }
             }
             
@@ -82,51 +97,41 @@ struct AgentView: View {
                     .disabled(taskInput.isEmpty)
                 }
             }
-            
-            // --- HEADER ---
-                        HStack {
-                            Text("Panda Agent")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                            Spacer()
-                            
-                            // STATUS INDICATOR
-                            if voiceAgent.isThinking {
-                                Text("Thinking...")
-                                    .foregroundColor(.orange)
-                                    .font(.caption)
-                            } else if voiceAgent.isListening {
-                                // Display the live caption here
-                                Text(voiceAgent.liveCaption.isEmpty ? "Listening..." : "\"\(voiceAgent.liveCaption)\"")
-                                    .foregroundColor(.green)
-                                    .font(.caption)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                            }
-                        }
-            
+
             Divider()
             
             // --- TASK LOG / OUTPUT AREA ---
-            ScrollView {
-                VStack(alignment: .leading, spacing: 8) {
-                    if isRunning {
-                        Text("Current Task: \(agentState.currentTask)")
-                            .font(.headline)
-                        
-                        Text("Step \(agentState.nSteps)...")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text("Ready for instructions.")
-                            .foregroundColor(.secondary)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if logManager.logs.isEmpty {
+                            Text("Ready for instructions.")
+                                .foregroundColor(.secondary)
+                                .padding()
+                        } else {
+                            ForEach(logManager.logs) { logEntry in
+                                Text(logEntry.formattedMessage)
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundColor(colorForLogLevel(logEntry.level))
+                                    .textSelection(.enabled)
+                                    .id(logEntry.id)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                }
+                .background(Color(nsColor: .textBackgroundColor))
+                .cornerRadius(8)
+                .onChange(of: logManager.logs.count) {
+                    // Auto-scroll to bottom when new logs arrive
+                    if let lastLog = logManager.logs.last {
+                        withAnimation {
+                            proxy.scrollTo(lastLog.id, anchor: .bottom)
+                        }
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
             }
-            .background(Color(nsColor: .textBackgroundColor))
-            .cornerRadius(8)
         }
         .padding()
         .onAppear {
@@ -174,5 +179,30 @@ struct AgentView: View {
     
     func stopTextAgent() {
         agent?.stop()
+    }
+
+    // MARK: - Helper Functions
+
+    func colorForLogLevel(_ level: LogEntry.LogLevel) -> Color {
+        switch level {
+        case .debug:
+            return .secondary
+        case .info:
+            return .primary
+        case .success:
+            return .green
+        case .warning:
+            return .orange
+        case .error:
+            return .red
+        case .thinking:
+            return .blue
+        case .sensing:
+            return .cyan
+        case .acting:
+            return .purple
+        case .goal:
+            return .mint
+        }
     }
 }

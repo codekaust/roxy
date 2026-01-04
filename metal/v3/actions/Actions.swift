@@ -194,7 +194,7 @@ struct OpenAppPayload: Codable {
 
 struct SpeakPayload: Codable { let message: String }
 struct AskPayload: Codable { let question: String }
-struct WaitPayload: Codable { let duration: Int }
+struct WaitPayload: Codable { let duration: String }
 
 struct ReadFilePayload: Codable {
     let fileName: String

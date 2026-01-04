@@ -33,8 +33,9 @@ class ActionExecutor {
             return ActionResult(longTermMemory: "Typed text: '\(payload.text)' and pressed Enter.")
 
         case .wait(let payload):
-            try? await Task.sleep(nanoseconds: UInt64(payload.duration) * 1_000_000_000) // 2 seconds
-            return ActionResult(longTermMemory: "Waited for 2 seconds.")
+            let duration = Int(payload.duration) ?? 2
+            try? await Task.sleep(nanoseconds: UInt64(duration) * 1_000_000_000)
+            return ActionResult(longTermMemory: "Waited for \(duration) seconds.")
 
         case .scroll(let payload):
             inputManager.scroll(amount: payload.amount)

@@ -56,23 +56,23 @@ class GeminiApi {
         }
         
         guard let jsonString = jsonResponse else {
-            print("GeminiApi: Failed to get response after \(maxRetry) retries.")
+            LogManager.shared.error("GeminiApi: Failed to get response after \(maxRetry) retries.")
             return nil
         }
-        
+
         // Parse the JSON String into AgentOutput
         do {
-            print("GeminiApi: Received JSON length: \(jsonString.count)")
-            
+            LogManager.shared.debug("GeminiApi: Received JSON length: \(jsonString.count)")
+
             // The proxy returns a String body. We need to convert that String -> Data -> Object
             guard let data = jsonString.data(using: .utf8) else { return nil }
-            
+
             let output = try decoder.decode(AgentOutput.self, from: data)
             return output
-            
+
         } catch {
-            print("GeminiApi: JSON Parsing Error: \(error)")
-            print("GeminiApi: Raw Response: \(jsonString)")
+            LogManager.shared.error("GeminiApi: JSON Parsing Error: \(error)")
+            LogManager.shared.debug("GeminiApi: Raw Response: \(jsonString)")
             return nil
         }
     }
@@ -115,7 +115,7 @@ class GeminiApi {
         
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorBody = String(data: data, encoding: .utf8) ?? "No body"
-            print("GeminiApi: Proxy Error \(httpResponse.statusCode): \(errorBody)")
+            LogManager.shared.error("GeminiApi: Proxy Error \(httpResponse.statusCode): \(errorBody)")
             throw URLError(.badServerResponse)
         }
         
@@ -141,15 +141,15 @@ class GeminiApi {
             do {
                 return try await operation()
             } catch {
-                print("GeminiApi: Attempt \(attempt)/\(times) failed: \(error.localizedDescription)")
-                
+                LogManager.shared.warning("GeminiApi: Attempt \(attempt)/\(times) failed: \(error.localizedDescription)")
+
                 if attempt == times {
                     return nil // All retries failed
                 }
-                
+
                 // Wait
                 try? await Task.sleep(nanoseconds: currentDelay)
-                
+
                 // Calculate next delay
                 let next = Double(currentDelay) * factor
                 currentDelay = min(UInt64(next), maxDelay)

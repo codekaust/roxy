@@ -19,7 +19,7 @@ class ConversationalAgent: ObservableObject {
     let sttManager = STTManager()
     private let ttsManager = TTSManager.shared
     private let perception = Perception()
-    private let llmClient = VoiceGeminiApi(modelName: "gemini-2.5-flash")
+    private let llmClient = VoiceGeminiApi(modelName: "gemini-3-flash-preview")
     
     // The "Task Executor" Agent
     private let taskAgentState = AgentState()
@@ -42,13 +42,13 @@ class ConversationalAgent: ObservableObject {
     // MARK: - Public Control
     
     func startSession() {
-        print("ConversationalAgent: Session Started \(conversationHistory)")
+        LogManager.shared.info("ConversationalAgent: Session Started \(conversationHistory)")
         initializeConversation()
         startListening()
     }
-    
+
     func stopSession() {
-        print("ConversationalAgent: Session Stopped")
+        LogManager.shared.info("ConversationalAgent: Session Stopped")
         sttManager.stopRecording()
         ttsManager.stop()
         taskAgent.stop()
@@ -71,8 +71,8 @@ class ConversationalAgent: ObservableObject {
     
     private func startListening() {
         guard !isListening else { return }
-        
-        print("ConversationalAgent: Listening...")
+
+        LogManager.shared.info("ConversationalAgent: Listening...")
         self.isListening = true
         self.liveCaption = ""
         
@@ -96,9 +96,10 @@ class ConversationalAgent: ObservableObject {
             .debounce(for: .seconds(1.5), scheduler: DispatchQueue.main)
             .sink { [weak self] finalString in
                 guard let self = self else { return }
-                
+
+
                 // If we are here, the user hasn't spoken for 1.5 seconds
-                print("Silence detected. Committing: \(finalString)")
+                LogManager.shared.info("Silence detected. Committing: \(finalString)")
                 self.processInput(text: finalString)
             }
             .store(in: &cancellables)
@@ -121,8 +122,8 @@ class ConversationalAgent: ObservableObject {
     // MARK: - Logic Port: processUserInput
     
     private func handleUserInput(_ userInput: String) async {
-        print("ConversationalAgent: User said: \(userInput)")
-        
+        LogManager.shared.info("ConversationalAgent: User said: \(userInput)")
+
         // 1. Check for hard stop command
         if userInput.lowercased().contains("stop") || userInput.lowercased().contains("exit") {
             await gracefulShutdown(message: "Goodbye!", reason: "command")
@@ -148,9 +149,9 @@ class ConversationalAgent: ObservableObject {
             await speakAndListen(text: "I'm having trouble thinking right now. Could you repeat that?")
             return
         }
-        
-        print("ConversationalAgent: Decision -> Type: \(decision.type) | Reply: \(decision.reply)")
-        
+
+        LogManager.shared.info("ConversationalAgent: Decision -> Type: \(decision.type) | Reply: \(decision.reply)")
+
         // 5. Handle Decision
         switch decision.type {
         case "Task":
@@ -184,8 +185,8 @@ class ConversationalAgent: ObservableObject {
              await speakAndListen(text: permMsg)
              return
         }
-        
-        print("ConversationalAgent: Starting Task Agent with instruction: \(decision.instruction)")
+
+        LogManager.shared.info("ConversationalAgent: Starting Task Agent with instruction: \(decision.instruction)")
         await ttsManager.speak(decision.safeReply)
         taskAgent.start(task: decision.instruction)
     }
@@ -207,7 +208,7 @@ class ConversationalAgent: ObservableObject {
     }
     
     private func gracefulShutdown(message: String, reason: String) async {
-        print("ConversationalAgent: Shutting down (\(reason))")
+        LogManager.shared.info("ConversationalAgent: Shutting down (\(reason))")
         await ttsManager.speak(message)
         stopSession()
     }
