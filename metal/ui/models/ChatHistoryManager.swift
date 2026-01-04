@@ -22,10 +22,22 @@ class ChatHistoryManager: ObservableObject {
         messages.append(message)
     }
 
+    // NEW: Add conversational AI message (no system logs)
+    func addConversationalAIMessage(_ text: String) {
+        let message = ChatMessage(
+            type: .aiResponse,
+            subtype: .conversation,  // No system logs
+            content: text,
+            status: .complete
+        )
+        messages.append(message)
+    }
+
     // Start AI response (when task begins)
     func startAIResponse(initialLog: String = "Starting task...") {
         let message = ChatMessage(
             type: .aiResponse,
+            subtype: .taskExecution,  // Has system logs
             content: initialLog,
             status: .inProgress,
             systemLogs: []

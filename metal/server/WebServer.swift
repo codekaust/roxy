@@ -55,6 +55,10 @@ class WebServer: ObservableObject {
             return try await self.handleStatus(request)
         }
 
+        await server.appendRoute("GET /api/chat") { request async throws -> HTTPResponse in
+            return try await self.handleChat(request)
+        }
+
         self.server = server
         self.localURL = "http://localhost:\(port)"
         self.isRunning = true
@@ -140,6 +144,14 @@ class WebServer: ObservableObject {
     private func handleStatus(_ request: HTTPRequest) async throws -> HTTPResponse {
         let status = await handleStatusRequest()
         return try encodeResponse(status)
+    }
+
+    /// Handle GET /api/chat - Return chat history with conversations and tasks
+    private func handleChat(_ request: HTTPRequest) async throws -> HTTPResponse {
+        let messages = ChatHistoryManager.shared.messages.map { msg -> ChatMessageDTO in
+            return ChatMessageDTO(from: msg)
+        }
+        return try encodeResponse(messages)
     }
 
     /// Helper to encode JSON response

@@ -41,3 +41,46 @@ struct LogEntryDTO: Codable {
         self.level = entry.level.rawValue
     }
 }
+
+/// Chat message data transfer object for web chat UI
+struct ChatMessageDTO: Codable {
+    let id: String
+    let timestamp: String  // ISO8601 format
+    let type: String  // "user", "ai", "system"
+    let subtype: String  // "conversation", "taskExecution"
+    let content: String
+    let status: String  // "complete", "inProgress", "error"
+    let systemLogs: [LogEntryDTO]
+
+    init(from message: ChatMessage) {
+        self.id = message.id.uuidString
+
+        let formatter = ISO8601DateFormatter()
+        self.timestamp = formatter.string(from: message.timestamp)
+
+        // Map type
+        switch message.type {
+        case .user: self.type = "user"
+        case .aiResponse: self.type = "ai"
+        case .system: self.type = "system"
+        }
+
+        // Map subtype
+        switch message.subtype {
+        case .conversation: self.subtype = "conversation"
+        case .taskExecution: self.subtype = "taskExecution"
+        }
+
+        self.content = message.content
+
+        // Map status
+        switch message.status {
+        case .complete: self.status = "complete"
+        case .inProgress: self.status = "inProgress"
+        case .error: self.status = "error"
+        }
+
+        // Map system logs
+        self.systemLogs = message.systemLogs.map { LogEntryDTO(from: $0) }
+    }
+}

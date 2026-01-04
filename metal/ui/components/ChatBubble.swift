@@ -28,8 +28,8 @@ struct ChatBubble: View {
                         .padding(.top, RoxySpacing.xs)
                     }
 
-                    // System logs (nested under AI responses)
-                    if message.type == .aiResponse && !message.systemLogs.isEmpty {
+                    // System logs (nested under AI responses) - ONLY for task execution
+                    if message.type == .aiResponse && message.subtype == .taskExecution && !message.systemLogs.isEmpty {
                         VStack(alignment: .leading, spacing: RoxySpacing.xs) {
                             ForEach(message.systemLogs) { log in
                                 SystemLogBubble(log: log)

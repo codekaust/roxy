@@ -32,6 +32,14 @@ class ActionExecutor {
             inputManager.pressEnter()
             return ActionResult(longTermMemory: "Typed text: '\(payload.text)' and pressed Enter.")
 
+        case .pressKey(let payload):
+            let success = inputManager.pressKeyByName(payload.key)
+            if success {
+                return ActionResult(longTermMemory: "Pressed key: '\(payload.key)'")
+            } else {
+                return ActionResult(error: "Unknown key name: '\(payload.key)'")
+            }
+
         case .wait(let payload):
             let duration = Int(payload.duration) ?? 2
             try? await Task.sleep(nanoseconds: UInt64(duration) * 1_000_000_000)
@@ -44,6 +52,7 @@ class ActionExecutor {
         case .openApp(let payload):
             let status = AppManager.launchApp(name: payload.appName)
             if status.contains("❌") {
+                print(status)
                 return ActionResult(error: status)
             }
             return ActionResult(longTermMemory: "Opened app: \(payload.appName)")
@@ -93,34 +102,7 @@ class ActionExecutor {
         case .speak(let payload):
             await TTSManager.shared.speak(payload.message)
             return ActionResult(longTermMemory: "Spoke: \"\(payload.message)\"")
-        // --- NEW: ASK ACTION ---
-        case .ask(let payload):
-            return await MainActor.run {
-                // 1. Speak the question using AVFoundation
-                Task { await TTSManager.shared.speak(payload.question) }
-                // 2. Create a Native Alert
-                let alert = NSAlert()
-                alert.messageText = "Agent Question"
-                alert.informativeText = payload.question
-                alert.alertStyle = .informational
-                alert.addButton(withTitle: "Reply")
-                
-                // 3. Add Input Field
-                let input = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
-                input.placeholderString = "Type your answer here..."
-                alert.accessoryView = input
-                
-                // 4. Focus the input field when window shows
-                alert.window.initialFirstResponder = input
-                
-                // 5. Run Modal (Blocks execution until user clicks Reply)
-                _ = alert.runModal()
-                
-                let answer = input.stringValue
-                
-                // 6. Return the answer as memory
-                return ActionResult(longTermMemory: "Asked user: \"\(payload.question)\". User replied: \"\(answer)\"")
-            }
+
         case .done(let payload):
             return ActionResult(
                 isDone: true,

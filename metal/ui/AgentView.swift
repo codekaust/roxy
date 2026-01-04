@@ -163,16 +163,8 @@ struct AgentView: View {
         let text = messageInput
         messageInput = ""
 
-        // Add user message to chat
-        chatHistory.addUserMessage(text)
-
-        // Start AI response
-        chatHistory.startAIResponse(initialLog: "Processing your request...")
-
-        // Start agent
-        agentState.nSteps = 0
-        agentState.stopped = false
-        agent?.start(task: text)
+        // NEW: Route through conversational agent (LLM decides: chat or task)
+        voiceAgent.handleTextInput(text)
     }
 
     func toggleVoice() {

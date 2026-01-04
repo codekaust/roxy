@@ -158,6 +158,74 @@
         .log-entry.warning { border-left: 3px solid #FF7043; }
         .log-entry.info { border-left: 3px solid #4FC3F7; }
 
+        /* Chat Message Styles */
+        .chat-message {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+
+        .chat-message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 80%;
+            border-radius: 12px;
+            padding: 12px 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, rgba(76, 195, 247, 0.2), rgba(149, 117, 205, 0.2));
+            border: 1px solid rgba(76, 195, 247, 0.3);
+        }
+
+        .ai-message {
+            background: rgba(33, 33, 33, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message-text {
+            font-size: 15px;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+            word-wrap: break-word;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #808080;
+            text-align: right;
+        }
+
+        .system-logs {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .system-logs .log-entry {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 13px;
+            background: transparent;
+            border: none;
+        }
+
+        .system-logs .log-icon {
+            font-size: 14px;
+        }
+
+        .system-logs .log-text {
+            color: #B0B0B0;
+        }
+
         /* Input Container */
         .input-container {
             padding: 20px;
@@ -311,8 +379,8 @@
         // State
         let isExecuting = false;
         let statusCheckInterval = null;
-        let logPollingInterval = null;
-        let displayedLogCount = 0;
+        let chatPollingInterval = null;
+        let displayedMessageCount = 0;
 
         // DOM Elements
         const logsContainer = document.getElementById('logsContainer');
@@ -335,17 +403,17 @@
             'debug': '🔍'
         };
 
-        // Poll logs from server
-        async function pollLogs() {
+        // Poll chat messages from server
+        async function pollChat() {
             try {
-                const response = await fetch('/api/logs');
-                const logs = await response.json();
+                const response = await fetch('/api/chat');
+                const messages = await response.json();
 
-                // Display only new logs
-                if (logs.length > displayedLogCount) {
-                    const newLogs = logs.slice(displayedLogCount);
-                    newLogs.forEach(log => appendLog(log));
-                    displayedLogCount = logs.length;
+                // Display only new messages
+                if (messages.length > displayedMessageCount) {
+                    const newMessages = messages.slice(displayedMessageCount);
+                    newMessages.forEach(msg => appendChatMessage(msg));
+                    displayedMessageCount = messages.length;
                 }
 
                 updateStatus(true);
@@ -354,57 +422,80 @@
             }
         }
 
-        // Start log polling
-        function startLogPolling() {
-            if (logPollingInterval) return;
+        // Start chat polling
+        function startChatPolling() {
+            if (chatPollingInterval) return;
 
             // Poll immediately, then every second
-            pollLogs();
-            logPollingInterval = setInterval(pollLogs, 1000);
+            pollChat();
+            chatPollingInterval = setInterval(pollChat, 1000);
         }
 
-        // Stop log polling
-        function stopLogPolling() {
-            if (logPollingInterval) {
-                clearInterval(logPollingInterval);
-                logPollingInterval = null;
+        // Stop chat polling
+        function stopChatPolling() {
+            if (chatPollingInterval) {
+                clearInterval(chatPollingInterval);
+                chatPollingInterval = null;
             }
         }
 
-        // Append log entry to UI
-        function appendLog(logEntry) {
+        // Append chat message to UI
+        function appendChatMessage(message) {
             // Hide empty state
             if (emptyState) {
                 emptyState.style.display = 'none';
             }
 
-            const logDiv = document.createElement('div');
-            logDiv.className = `log-entry ${logEntry.level}`;
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${message.type}`;
 
-            const icon = document.createElement('div');
-            icon.className = 'log-icon';
-            icon.textContent = logIcons[logEntry.level] || '📝';
+            // Different styling for user vs AI messages
+            if (message.type === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="message-content user-message">
+                        <div class="message-text">${escapeHtml(message.content)}</div>
+                        <div class="message-time">${formatTime(message.timestamp)}</div>
+                    </div>
+                `;
+            } else if (message.type === 'ai') {
+                let html = `
+                    <div class="message-content ai-message">
+                        <div class="message-text">${escapeHtml(message.content)}</div>
+                `;
 
-            const content = document.createElement('div');
-            content.className = 'log-content';
+                // Show system logs ONLY for task execution
+                if (message.subtype === 'taskExecution' && message.systemLogs.length > 0) {
+                    html += '<div class="system-logs">';
+                    message.systemLogs.forEach(log => {
+                        html += `
+                            <div class="log-entry ${log.level}">
+                                <span class="log-icon">${logIcons[log.level] || '📝'}</span>
+                                <span class="log-text">${escapeHtml(log.message)}</span>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
 
-            const time = document.createElement('div');
-            time.className = 'log-time';
-            time.textContent = formatTime(logEntry.timestamp);
+                html += `
+                        <div class="message-time">${formatTime(message.timestamp)}</div>
+                    </div>
+                `;
 
-            const message = document.createElement('div');
-            message.className = 'log-message';
-            message.textContent = logEntry.message;
+                messageDiv.innerHTML = html;
+            }
 
-            content.appendChild(time);
-            content.appendChild(message);
-            logDiv.appendChild(icon);
-            logDiv.appendChild(content);
-
-            logsContainer.appendChild(logDiv);
+            logsContainer.appendChild(messageDiv);
 
             // Auto-scroll to bottom
             logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        // Helper to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Format timestamp
@@ -500,7 +591,7 @@
         });
 
         // Initialize
-        startLogPolling();
+        startChatPolling();
         taskInput.focus();
     </script>
 </body>

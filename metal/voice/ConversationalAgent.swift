@@ -39,7 +39,7 @@ class ConversationalAgent: ObservableObject {
     }
     
     // MARK: - Public Control
-    
+
     func startSession() {
         LogManager.shared.info("ConversationalAgent: Session Started \(conversationHistory)")
         initializeConversation()
@@ -55,6 +55,22 @@ class ConversationalAgent: ObservableObject {
         self.isListening = false
         // Cancel any pending silence timers
         cancellables.removeAll()
+    }
+
+    // NEW: Public method to handle text input from AgentView
+    func handleTextInput(_ userInput: String) {
+        // Initialize conversation if empty (first text input)
+        if conversationHistory.isEmpty {
+            initializeConversation()
+        }
+
+        // Add user message to chat
+        ChatHistoryManager.shared.addUserMessage(userInput)
+
+        // Process through the same logic as voice
+        Task {
+            await handleUserInput(userInput)
+        }
     }
     
 
@@ -109,10 +125,13 @@ class ConversationalAgent: ObservableObject {
         // Stop listening so we don't pick up the agent's own voice
         sttManager.stopRecording()
         self.isListening = false
-        cancellables.removeAll() 
-        
+        cancellables.removeAll()
+
         guard !text.isEmpty else { return }
-        
+
+        // NEW: Add user's voice message to chat
+        ChatHistoryManager.shared.addUserMessage(text)
+
         Task {
             await handleUserInput(text)
         }
@@ -161,6 +180,10 @@ class ConversationalAgent: ObservableObject {
             fallthrough
         default:
             conversationHistory.append(GeminiMessage(role: .model, parts: [.text(decision.safeReply)]))
+
+            // NEW: Add AI reply to chat
+            ChatHistoryManager.shared.addConversationalAIMessage(decision.safeReply)
+
             if decision.shouldEnd == "Finished" {
                 await gracefulShutdown(message: decision.safeReply, reason: "model_ended")
             } else {
@@ -202,9 +225,17 @@ class ConversationalAgent: ObservableObject {
     private func handleKillTaskDecision(_ decision: ModelDecision) async {
         if !taskAgentState.stopped {
             taskAgent.stop()
+
+            // NEW: Add confirmation to chat
+            ChatHistoryManager.shared.addConversationalAIMessage(decision.safeReply)
+
             await speakAndListen(text: decision.safeReply)
         } else {
-            await speakAndListen(text: "There was no automation running, but I can help with something else.")
+            // NEW: Add "no task running" message to chat
+            let message = "There was no automation running, but I can help with something else."
+            ChatHistoryManager.shared.addConversationalAIMessage(message)
+
+            await speakAndListen(text: message)
         }
     }
     

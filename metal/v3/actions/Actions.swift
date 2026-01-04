@@ -15,9 +15,9 @@ struct ActionSpec {
 enum Action: Codable {
     case tap(TapPayload)
     case type(TypePayload)
+    case pressKey(PressKeyPayload)
     case scroll(ScrollPayload)
     case openApp(OpenAppPayload)
-    case ask(AskPayload)
     case speak(SpeakPayload)
     case wait(WaitPayload)
     case back(NoArgsPayload)
@@ -41,6 +41,13 @@ enum Action: Codable {
                 description: "Type text into the currently focused field.",
                 params: [
                     ParamSpec(name: "text", type: "String", description: "Text to type.")
+                ]
+            ),
+            ActionSpec(
+                name: "press_key",
+                description: "Press a single keyboard key (arrow keys, enter, escape, function keys, etc.).",
+                params: [
+                    ParamSpec(name: "key", type: "String", description: "Key name (e.g., 'enter', 'escape', 'left', 'right', 'up', 'down', 'tab', 'space', 'f1', 'home', 'end', 'pageup', 'pagedown')")
                 ]
             ),
             ActionSpec(
@@ -103,13 +110,6 @@ enum Action: Codable {
                 params: [
                     ParamSpec(name: "message", type: "String", description: "The text to speak.")
                 ]
-            ),
-            ActionSpec(
-                name: "ask",
-                description: "Ask the user a question and wait for a text response.",
-                params: [
-                    ParamSpec(name: "question", type: "String", description: "The question to ask.")
-                ]
             )
         ]
     }
@@ -117,25 +117,25 @@ enum Action: Codable {
     // JSON Keys
     enum CodingKeys: String, CodingKey {
         case tap, type, scroll, done, wait, back, home
+        case pressKey = "press_key"
         case openApp = "open_app"
         case readFile = "read_file"
         case writeFile = "write_file"
         case appendFile = "append_file"
         case searchGoogle = "search_google"
-        case ask
         case speak
     }
     
     // Decoding Logic
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         if let val = try? container.decode(TapPayload.self, forKey: .tap) { self = .tap(val) }
         else if let val = try? container.decode(TypePayload.self, forKey: .type) { self = .type(val) }
+        else if let val = try? container.decode(PressKeyPayload.self, forKey: .pressKey) { self = .pressKey(val) }
         else if let val = try? container.decode(ScrollPayload.self, forKey: .scroll) { self = .scroll(val) }
         else if let val = try? container.decode(OpenAppPayload.self, forKey: .openApp) { self = .openApp(val) }
         else if let val = try? container.decode(SpeakPayload.self, forKey: .speak) { self = .speak(val) }
-        else if let val = try? container.decode(AskPayload.self, forKey: .ask) { self = .ask(val) }
         else if let val = try? container.decode(WaitPayload.self, forKey: .wait) { self = .wait(val) }
         else if let val = try? container.decode(ReadFilePayload.self, forKey: .readFile) { self = .readFile(val) }
         else if let val = try? container.decode(WriteFilePayload.self, forKey: .writeFile) { self = .writeFile(val) }
@@ -154,10 +154,10 @@ enum Action: Codable {
         switch self {
         case .tap(let val): try container.encode(val, forKey: .tap)
         case .type(let val): try container.encode(val, forKey: .type)
+        case .pressKey(let val): try container.encode(val, forKey: .pressKey)
         case .scroll(let val): try container.encode(val, forKey: .scroll)
         case .openApp(let val): try container.encode(val, forKey: .openApp)
         case .speak(let val): try container.encode(val, forKey: .speak)
-        case .ask(let val): try container.encode(val, forKey: .ask)
         case .wait(let val): try container.encode(val, forKey: .wait)
         case .readFile(let val): try container.encode(val, forKey: .readFile)
         case .writeFile(let val): try container.encode(val, forKey: .writeFile)
@@ -175,6 +175,7 @@ struct NoArgsPayload: Codable {}
 
 struct TapPayload: Codable { let index: Int }
 struct TypePayload: Codable { let text: String }
+struct PressKeyPayload: Codable { let key: String }
 
 struct ScrollPayload: Codable {
     let amount: Int
@@ -186,7 +187,6 @@ struct OpenAppPayload: Codable {
 }
 
 struct SpeakPayload: Codable { let message: String }
-struct AskPayload: Codable { let question: String }
 struct WaitPayload: Codable { let duration: String }
 
 struct ReadFilePayload: Codable {
