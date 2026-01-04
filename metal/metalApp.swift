@@ -78,6 +78,26 @@ class AppState: ObservableObject {
         
         // Ensure voice agent is ready
         print("AppState: Voice Agent ready")
+
+        // Start Web Server if enabled in settings
+        let enableWebServer = UserDefaults.standard.bool(forKey: "enableWebServer")
+        if enableWebServer {
+            Task {
+                do {
+                    try await WebServer.shared.start(port: 8080)
+                    LogManager.shared.info("Web server started on port 8080")
+                } catch {
+                    LogManager.shared.error("Failed to start web server: \(error)")
+                }
+            }
+        }
+    }
+
+    deinit {
+        // Stop web server on app quit
+        Task {
+            await WebServer.shared.stop()
+        }
     }
     
     // MARK: - Live Typing Logic

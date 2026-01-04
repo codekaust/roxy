@@ -27,23 +27,25 @@ extension Color {
 // MARK: - Roxy Colors
 
 struct RoxyColors {
-    // Primary Neon Colors - CYBERPUNK PALETTE
-    static let neonCyan = Color(hex: "00FFFF")       // Electric cyan (pure)
-    static let neonMagenta = Color(hex: "FF00FF")    // Electric magenta (pure)
-    static let neonBlue = Color(hex: "00BBFF")       // Electric blue
-    static let neonGreen = Color(hex: "00FF41")      // Matrix green
-    static let neonPink = Color(hex: "FF006E")       // Hot neon pink
-    static let neonPurple = Color(hex: "BB00FF")     // Neon purple
-    static let neonOrange = Color(hex: "FF9500")     // Neon orange
+    // Sleek Futuristic Palette - Refined and sophisticated
+    static let neonCyan = Color(hex: "4FC3F7")       // Soft cyan
+    static let neonMagenta = Color(hex: "BA68C8")    // Soft magenta
+    static let neonBlue = Color(hex: "5C6BC0")       // Deep refined blue
+    static let neonGreen = Color(hex: "66BB6A")      // Soft green
+    static let neonPink = Color(hex: "EC407A")       // Refined pink
+    static let neonPurple = Color(hex: "9575CD")     // Soft purple
+    static let neonOrange = Color(hex: "FF7043")     // Soft orange
 
-    // Backgrounds
+    // Backgrounds - Dark but sophisticated
     static let pureBlack = Color(hex: "000000")      // Pure OLED black
-    static let darkGray = Color(hex: "0A0A0A")       // Very dark gray for subtle contrast
-    static let darkerGray = Color(hex: "151515")     // Card backgrounds
+    static let darkGray = Color(hex: "0D0D0D")       // Very dark gray for subtle contrast
+    static let darkerGray = Color(hex: "1A1A1A")     // Card backgrounds
+    static let surfaceGray = Color(hex: "212121")    // Surface elements
 
-    // Text
-    static let neonWhite = Color.white               // Pure white for text
-    static let dimWhite = Color(hex: "CCCCCC")       // Dimmed white for secondary text
+    // Text - High contrast but not harsh
+    static let neonWhite = Color(hex: "FFFFFF")      // Pure white for text
+    static let dimWhite = Color(hex: "B0B0B0")       // Dimmed white for secondary text
+    static let mutedWhite = Color(hex: "808080")     // Very subtle text
 
     // Legacy colors (kept for backwards compatibility)
     static let cyan = neonCyan
@@ -250,44 +252,43 @@ extension View {
     }
 }
 
-// MARK: - Dark Glass Effect Modifier (Neon Theme)
+// MARK: - Dark Glass Effect Modifier (Sleek Futuristic)
 
 struct DarkGlassEffect: ViewModifier {
     var tintColor: Color
     var neonBorderGradient: LinearGradient
-    var opacity: Double = 0.3  // Lower opacity for darker glass
+    var opacity: Double = 0.4  // Slightly more visible glass
     var cornerRadius: CGFloat = RoxyCornerRadius.lg
-    var glowRadius: CGFloat = 15  // Aggressive glow
+    var glowRadius: CGFloat = 4  // Subtle refined glow
 
     func body(content: Content) -> some View {
         content
             .background(
                 ZStack {
-                    // Very dark background
-                    RoxyColors.darkerGray
+                    // Dark sophisticated background
+                    RoxyColors.surfaceGray
 
-                    // Subtle tint overlay
+                    // Very subtle tint overlay
                     LinearGradient(
-                        colors: [tintColor.opacity(0.15), tintColor.opacity(0.05)],
+                        colors: [tintColor.opacity(0.08), tintColor.opacity(0.02)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
 
-                    // Darker blur material
+                    // Refined blur material
                     Rectangle()
-                        .fill(Material.thick)  // Changed from ultraThinMaterial
+                        .fill(Material.ultraThin)
                         .opacity(opacity)
                 }
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .strokeBorder(neonBorderGradient, lineWidth: 2)  // Thicker border
+                    .strokeBorder(neonBorderGradient, lineWidth: 0.5)  // Thin refined border
             )
             .cornerRadius(cornerRadius)
-            // Triple shadow for aggressive neon glow
-            .shadow(color: tintColor.opacity(0.8), radius: glowRadius, x: 0, y: 0)
-            .shadow(color: tintColor.opacity(0.5), radius: glowRadius * 1.5, x: 0, y: 0)
-            .shadow(color: tintColor.opacity(0.3), radius: glowRadius * 2, x: 0, y: 0)
+            // Subtle sophisticated glow
+            .shadow(color: tintColor.opacity(0.2), radius: glowRadius, x: 0, y: 2)
+            .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)  // Depth shadow
     }
 }
 
@@ -295,9 +296,9 @@ extension View {
     func darkGlassEffect(
         tint: Color,
         neonBorder: LinearGradient,
-        opacity: Double = 0.3,
+        opacity: Double = 0.4,
         cornerRadius: CGFloat = RoxyCornerRadius.lg,
-        glowRadius: CGFloat = 15
+        glowRadius: CGFloat = 4
     ) -> some View {
         self.modifier(DarkGlassEffect(
             tintColor: tint,

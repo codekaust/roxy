@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2AA202C72EF63E3900D74F5D /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA202C52EF63E3900D74F5B /* Vortex */; };
 		2AA202C82EF63E3900D74F5E /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA202C62EF63E3900D74F5C /* Shimmer */; };
+		32B2AFE22F0A8D0800EA8A32 /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 32B2AFE12F0A8D0800EA8A32 /* FlyingFox */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2AA202C72EF63E3900D74F5D /* Vortex in Frameworks */,
+				32B2AFE22F0A8D0800EA8A32 /* FlyingFox in Frameworks */,
 				2AA202C82EF63E3900D74F5E /* Shimmer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -85,6 +87,7 @@
 				2AA2029A2EF63E3800D74F58 /* metal */,
 				2AA202A92EF63E3900D74F58 /* metalTests */,
 				2AA202B32EF63E3900D74F58 /* metalUITests */,
+				32B2AFE02F0A8D0800EA8A32 /* Frameworks */,
 				2AA202992EF63E3800D74F58 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -97,6 +100,13 @@
 				2AA202B02EF63E3900D74F58 /* metalUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		32B2AFE02F0A8D0800EA8A32 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -121,6 +131,7 @@
 			packageProductDependencies = (
 				2AA202C52EF63E3900D74F5B /* Vortex */,
 				2AA202C62EF63E3900D74F5C /* Shimmer */,
+				32B2AFE12F0A8D0800EA8A32 /* FlyingFox */,
 			);
 			productName = metal;
 			productReference = 2AA202982EF63E3800D74F58 /* metal.app */;
@@ -207,6 +218,7 @@
 			packageReferences = (
 				2AA202C32EF63E3900D74F59 /* XCRemoteSwiftPackageReference "Vortex" */,
 				2AA202C42EF63E3900D74F5A /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
+				32B2AFDF2F0A8B3E00EA8A32 /* XCRemoteSwiftPackageReference "FlyingFox" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2AA202992EF63E3800D74F58 /* Products */;
@@ -587,6 +599,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		32B2AFDF2F0A8B3E00EA8A32 /* XCRemoteSwiftPackageReference "FlyingFox" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swhitty/FlyingFox.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.26.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -599,6 +619,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2AA202C42EF63E3900D74F5A /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
 			productName = Shimmer;
+		};
+		32B2AFE12F0A8D0800EA8A32 /* FlyingFox */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 32B2AFDF2F0A8B3E00EA8A32 /* XCRemoteSwiftPackageReference "FlyingFox" */;
+			productName = FlyingFox;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

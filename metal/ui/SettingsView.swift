@@ -3,9 +3,11 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage("showDebugOverlay") private var showDebugOverlay = true
     @AppStorage("autoRefreshOverlay") private var autoRefreshOverlay = false
+    @AppStorage("enableWebServer") private var enableWebServer = false
     @ObservedObject private var ttsManager = TTSManager.shared
     @ObservedObject private var permissionManager = PermissionManager.shared
     @ObservedObject private var configManager = ConfigurationManager.shared
+    @ObservedObject private var webServer = WebServer.shared
     @State private var showPermissionView = false
 
     @State private var geminiAPIKey: String = ""
@@ -16,7 +18,9 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("API Keys")) {
+            Section(header: Text("API Keys")
+                .foregroundColor(RoxyColors.neonCyan)
+                .font(RoxyFonts.headline)) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Configure your API keys for different services")
                         .font(.caption)
@@ -152,7 +156,9 @@ struct SettingsView: View {
                 }
             }
 
-            Section(header: Text("Permissions")) {
+            Section(header: Text("Permissions")
+                .foregroundColor(RoxyColors.neonPurple)
+                .font(RoxyFonts.headline)) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Image(systemName: "hand.tap.fill")
@@ -229,7 +235,9 @@ struct SettingsView: View {
                 }
             }
 
-            Section(header: Text("Developer Tools")) {
+            Section(header: Text("Developer Tools")
+                .foregroundColor(RoxyColors.neonOrange)
+                .font(RoxyFonts.headline)) {
                 Toggle(isOn: $showDebugOverlay) {
                     VStack(alignment: .leading) {
                         Text("Enable Debug Overlay")
@@ -246,7 +254,9 @@ struct SettingsView: View {
                         .font(.subheadline)
                 }
             }
-            Section(header: Text("Voice Settings")) {
+            Section(header: Text("Voice Settings")
+                .foregroundColor(RoxyColors.neonGreen)
+                .font(RoxyFonts.headline)) {
                 Toggle(isOn: $ttsManager.useCloudTTS) {
                     VStack(alignment: .leading) {
                         Text("Use Cloud TTS")
@@ -256,8 +266,104 @@ struct SettingsView: View {
                     }
                 }
             }
-            
+
+            Section(header: Text("Web Remote Control")
+                .foregroundColor(RoxyColors.neonMagenta)
+                .font(RoxyFonts.headline)) {
+                VStack(alignment: .leading, spacing: 12) {
+                    // Enable/Disable Toggle
+                    Toggle(isOn: $enableWebServer) {
+                        VStack(alignment: .leading) {
+                            Text("Enable Web Remote Control")
+                                .font(.headline)
+                            Text("Access Roxy from any device via web browser")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .toggleStyle(.switch)
+                    .onChange(of: enableWebServer) { newValue in
+                        if newValue {
+                            Task {
+                                do {
+                                    try await webServer.start(port: 8080)
+                                } catch {
+                                    LogManager.shared.error("Failed to start web server: \(error)")
+                                }
+                            }
+                        } else {
+                            webServer.stop()
+                        }
+                    }
+
+                    // Status indicator (only shown when enabled)
+                    if enableWebServer {
+                        Divider()
+
+                        HStack {
+                            Image(systemName: webServer.isRunning ? "network" : "network.slash")
+                                .foregroundColor(webServer.isRunning ? RoxyColors.success : .gray)
+                            Text("Server Status")
+                            Spacer()
+                            Text(webServer.isRunning ? "Running" : "Stopped")
+                                .font(.caption)
+                                .foregroundColor(webServer.isRunning ? RoxyColors.success : .gray)
+                        }
+
+                        // Local URL
+                        if webServer.isRunning && !webServer.localURL.isEmpty {
+                            HStack {
+                                Text("Local:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Text(webServer.localURL)
+                                    .font(.caption.monospaced())
+                                    .lineLimit(1)
+                                Spacer()
+                                Button("Copy") {
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(webServer.localURL, forType: .string)
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
+
+                        // Public URL with Copy button
+                        if !webServer.publicURL.isEmpty {
+                            HStack {
+                                Text("Public:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Text(webServer.publicURL)
+                                    .font(.caption.monospaced())
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                                Spacer()
+                                Button("Copy Webapp URL") {
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(webServer.publicURL, forType: .string)
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        }
+
+                        // Error display
+                        if let error = webServer.error {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(RoxyColors.warning)
+                                Text(error)
+                                    .font(.caption)
+                                    .foregroundColor(RoxyColors.warning)
+                            }
+                        }
+                    }
+                }
+            }
+
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.black)
         .padding()
         .navigationTitle("Settings")
         .sheet(isPresented: $showPermissionView) {

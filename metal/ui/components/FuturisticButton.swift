@@ -31,13 +31,13 @@ struct FuturisticButton: View {
                 return RoxyGradients.cyanPurple
             case .success:
                 return LinearGradient(
-                    colors: [RoxyColors.lime, Color.green],
+                    colors: [RoxyColors.neonGreen, RoxyColors.success],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             case .danger:
                 return LinearGradient(
-                    colors: [Color.red, RoxyColors.pink],
+                    colors: [RoxyColors.error, RoxyColors.neonPink],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -47,13 +47,13 @@ struct FuturisticButton: View {
         var glowColor: Color {
             switch self {
             case .primary, .iconOnly, .voice:
-                return RoxyColors.cyan
+                return RoxyColors.neonCyan
             case .secondary:
-                return RoxyColors.purple
+                return RoxyColors.neonPurple
             case .success:
-                return RoxyColors.lime
+                return RoxyColors.neonGreen
             case .danger:
-                return Color.red
+                return RoxyColors.error
             }
         }
 
@@ -89,13 +89,13 @@ struct FuturisticButton: View {
         var fontSize: Font {
             switch self {
             case .small:
-                return .system(.caption, design: .rounded, weight: .semibold)
+                return RoxyFonts.caption
             case .medium:
-                return .system(.body, design: .rounded, weight: .semibold)
+                return RoxyFonts.body
             case .large:
-                return .system(.title3, design: .rounded, weight: .semibold)
+                return RoxyFonts.headline
             case .icon:
-                return .system(.title2, design: .rounded, weight: .semibold)
+                return RoxyFonts.title3
             }
         }
 
@@ -173,14 +173,15 @@ struct FuturisticButton: View {
                 Group {
                     if variant.shouldUseGlass {
                         ZStack {
+                            RoxyColors.surfaceGray
                             LinearGradient(
-                                colors: [variant.glowColor.opacity(0.2), variant.glowColor.opacity(0.05)],
+                                colors: [variant.glowColor.opacity(0.08), variant.glowColor.opacity(0.02)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                             Rectangle()
-                                .fill(Material.ultraThinMaterial)
-                                .opacity(0.7)
+                                .fill(Material.ultraThin)
+                                .opacity(0.4)
                         }
                     } else {
                         variant.gradient
@@ -191,11 +192,12 @@ struct FuturisticButton: View {
                 RoundedRectangle(cornerRadius: variant == .iconOnly || size == .icon ? RoxyCornerRadius.full : RoxyCornerRadius.md)
                     .stroke(
                         RoxyGradients.glassBorder,
-                        lineWidth: variant.shouldUseGlass ? 1 : 0
+                        lineWidth: variant.shouldUseGlass ? 0.5 : 0
                     )
             )
             .cornerRadius(variant == .iconOnly || size == .icon ? RoxyCornerRadius.full : RoxyCornerRadius.md)
-            .shadow(color: variant.glowColor.opacity(isHovered ? 0.6 : 0.3), radius: isHovered ? 15 : 10)
+            .shadow(color: variant.glowColor.opacity(isHovered ? 0.25 : 0.15), radius: isHovered ? 5 : 3, x: 0, y: 2)
+            .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
             .scaleEffect(isPressed ? 0.95 : (isHovered ? 1.02 : 1.0))
         }
         .buttonStyle(.plain)
@@ -270,7 +272,7 @@ struct VoiceButton: View {
                                 endPoint: .bottomTrailing
                             )
                             : LinearGradient(
-                                colors: [RoxyColors.cyan.opacity(0.3), RoxyColors.purple.opacity(0.2)],
+                                colors: [RoxyColors.neonCyan.opacity(0.15), RoxyColors.neonPurple.opacity(0.08)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -279,14 +281,17 @@ struct VoiceButton: View {
                         Circle()
                             .strokeBorder(
                                 RoxyGradients.glassBorder,
-                                lineWidth: 1
+                                lineWidth: 0.5
                             )
                     )
                     .frame(width: 48, height: 48)
                     .shadow(
-                        color: isListening ? Color.red.opacity(0.6) : RoxyColors.cyan.opacity(0.3),
-                        radius: isListening ? 20 : 10
+                        color: isListening ? Color.red.opacity(0.3) : RoxyColors.neonCyan.opacity(0.15),
+                        radius: isListening ? 6 : 3,
+                        x: 0,
+                        y: 2
                     )
+                    .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
 
                 // Icon
                 Image(systemName: isListening ? "mic.fill" : "mic.slash.fill")

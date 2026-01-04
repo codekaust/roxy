@@ -19,22 +19,22 @@ struct ChatBubble: View {
                     .padding(RoxySpacing.md)
                     .background(
                         ZStack {
-                            // Dark base background
+                            // Dark sophisticated background
                             RoundedRectangle(cornerRadius: RoxyCornerRadius.lg)
-                                .fill(RoxyColors.darkerGray)
+                                .fill(RoxyColors.surfaceGray)
 
-                            // Neon gradient overlay
+                            // Subtle refined gradient overlay
                             RoundedRectangle(cornerRadius: RoxyCornerRadius.lg)
                                 .fill(bubbleGradient)
                         }
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: RoxyCornerRadius.lg)
-                            .strokeBorder(borderGradient, lineWidth: 2)
+                            .strokeBorder(borderGradient, lineWidth: 0.5)
                     )
-                    // Double shadow for aggressive neon glow
-                    .shadow(color: shadowColor, radius: 15, x: 0, y: 0)
-                    .shadow(color: shadowColor.opacity(0.5), radius: 20, x: 0, y: 0)
+                    // Subtle refined glow
+                    .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
+                    .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
 
                 // Status indicator for in-progress messages
                 if message.status == .inProgress {
@@ -86,8 +86,8 @@ struct ChatBubble: View {
         case .user:
             return LinearGradient(
                 colors: [
-                    RoxyColors.neonCyan.opacity(0.3),
-                    RoxyColors.neonCyan.opacity(0.1)
+                    RoxyColors.neonCyan.opacity(0.15),
+                    RoxyColors.neonCyan.opacity(0.05)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -95,15 +95,15 @@ struct ChatBubble: View {
         case .aiResponse:
             return LinearGradient(
                 colors: [
-                    RoxyColors.neonPurple.opacity(0.3),
-                    RoxyColors.neonMagenta.opacity(0.1)
+                    RoxyColors.neonPurple.opacity(0.15),
+                    RoxyColors.neonMagenta.opacity(0.05)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case .system:
             return LinearGradient(
-                colors: [Color.white.opacity(0.1), Color.white.opacity(0.05)],
+                colors: [Color.white.opacity(0.05), Color.white.opacity(0.02)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -114,19 +114,19 @@ struct ChatBubble: View {
         switch message.type {
         case .user:
             return LinearGradient(
-                colors: [RoxyColors.neonCyan, RoxyColors.neonBlue],
+                colors: [RoxyColors.neonCyan.opacity(0.6), RoxyColors.neonBlue.opacity(0.4)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case .aiResponse:
             return LinearGradient(
-                colors: [RoxyColors.neonMagenta, RoxyColors.neonPurple],
+                colors: [RoxyColors.neonMagenta.opacity(0.6), RoxyColors.neonPurple.opacity(0.4)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case .system:
             return LinearGradient(
-                colors: [Color.white.opacity(0.3), Color.white.opacity(0.1)],
+                colors: [Color.white.opacity(0.2), Color.white.opacity(0.1)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -135,8 +135,8 @@ struct ChatBubble: View {
 
     var shadowColor: Color {
         switch message.type {
-        case .user: return RoxyColors.neonCyan.opacity(0.7)
-        case .aiResponse: return RoxyColors.neonMagenta.opacity(0.7)
+        case .user: return RoxyColors.neonCyan.opacity(0.25)
+        case .aiResponse: return RoxyColors.neonMagenta.opacity(0.25)
         case .system: return Color.clear
         }
     }

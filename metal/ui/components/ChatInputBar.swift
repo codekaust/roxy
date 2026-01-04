@@ -15,26 +15,30 @@ struct ChatInputBar: View {
                 text: $text
             )
             .font(RoxyFonts.bodyLarge)
-            .foregroundColor(isDisabled ? RoxyColors.dimWhite : RoxyColors.neonWhite)
+            .foregroundColor(isDisabled ? RoxyColors.mutedWhite : RoxyColors.neonWhite)
             .padding(RoxySpacing.md)
             .background(
                 RoundedRectangle(cornerRadius: RoxyCornerRadius.lg)
-                    .fill(RoxyColors.darkerGray)
+                    .fill(RoxyColors.surfaceGray)
                     .overlay(
                         RoundedRectangle(cornerRadius: RoxyCornerRadius.lg)
                             .stroke(
                                 isDisabled ?
                                     LinearGradient(
-                                        colors: [Color.gray.opacity(0.5), Color.gray.opacity(0.3)],
+                                        colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.2)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ) :
-                                    RoxyGradients.neonBorderCyan,
-                                lineWidth: 2
+                                    LinearGradient(
+                                        colors: [RoxyColors.neonCyan.opacity(0.4), RoxyColors.neonBlue.opacity(0.3)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                lineWidth: 0.5
                             )
                     )
             )
-            .glow(color: isDisabled ? .clear : RoxyColors.neonCyan, radius: 10)
+            .shadow(color: isDisabled ? .clear : RoxyColors.neonCyan.opacity(0.15), radius: 4, x: 0, y: 2)
             .disabled(isDisabled)
             .onSubmit {
                 if !isDisabled {

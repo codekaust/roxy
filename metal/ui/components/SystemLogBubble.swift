@@ -6,40 +6,39 @@ struct SystemLogBubble: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: RoxySpacing.xs) {
-            // Icon with glow
+            // Icon with subtle accent
             Image(systemName: iconForLogLevel(log.level))
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(colorForLogLevel(log.level))
-                .frame(width: 18)
-                .glow(color: colorForLogLevel(log.level), radius: 8)
+                .frame(width: 16)
 
             // Content
             VStack(alignment: .leading, spacing: 2) {
                 Text(log.formattedMessage)
                     .font(RoxyFonts.caption)
-                    .foregroundColor(RoxyColors.neonWhite)
+                    .foregroundColor(RoxyColors.dimWhite)
                     .lineLimit(2)
 
                 Text(log.timestamp, style: .time)
                     .font(.system(size: 10, design: .default))
-                    .foregroundColor(RoxyColors.dimWhite.opacity(0.7))
+                    .foregroundColor(RoxyColors.mutedWhite)
             }
         }
         .padding(RoxySpacing.xs)
         .background(
             ZStack {
-                // Dark base
+                // Dark refined base
                 RoundedRectangle(cornerRadius: RoxyCornerRadius.sm)
-                    .fill(RoxyColors.darkerGray)
+                    .fill(RoxyColors.darkGray)
 
-                // Colored overlay
+                // Very subtle colored overlay
                 RoundedRectangle(cornerRadius: RoxyCornerRadius.sm)
-                    .fill(Color(colorForLogLevel(log.level).opacity(0.25)))
+                    .fill(Color(colorForLogLevel(log.level).opacity(0.08)))
                     .overlay(
                         RoundedRectangle(cornerRadius: RoxyCornerRadius.sm)
                             .strokeBorder(
-                                colorForLogLevel(log.level).opacity(0.6),
-                                lineWidth: 1
+                                colorForLogLevel(log.level).opacity(0.3),
+                                lineWidth: 0.5
                             )
                     )
             }

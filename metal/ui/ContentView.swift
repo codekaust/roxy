@@ -13,11 +13,11 @@ struct ContentView: View {
 
             // Main content
             NavigationSplitView {
-                // Sidebar with glassmorphism
+                // Sidebar with dark theme
                 ZStack {
-                    // Slight tinted background for sidebar
+                    // Dark background for sidebar
                     Rectangle()
-                        .fill(RoxyColors.purple.opacity(0.1))
+                        .fill(RoxyColors.darkGray)
 
                     List(SidebarItem.allCases, selection: $selectedItem) { item in
                         NavigationLink(value: item) {
@@ -25,29 +25,30 @@ struct ContentView: View {
                                 Text(item.title)
                                     .font(RoxyFonts.body)
                                     .fontWeight(.semibold)
+                                    .foregroundColor(RoxyColors.neonWhite)
                             } icon: {
                                 Image(systemName: item.icon)
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(selectedItem == item ? RoxyColors.cyan : RoxyColors.purple)
+                                    .foregroundColor(selectedItem == item ? RoxyColors.neonCyan : RoxyColors.dimWhite)
                             }
                         }
                         .listRowBackground(
                             Group {
                                 if selectedItem == item {
                                     RoundedRectangle(cornerRadius: RoxyCornerRadius.md)
-                                        .fill(RoxyColors.cyan.opacity(0.15))
+                                        .fill(RoxyColors.neonCyan.opacity(0.12))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: RoxyCornerRadius.md)
                                                 .strokeBorder(
                                                     LinearGradient(
-                                                        colors: [RoxyColors.cyan.opacity(0.6), RoxyColors.cyan.opacity(0.2)],
+                                                        colors: [RoxyColors.neonCyan.opacity(0.4), RoxyColors.neonCyan.opacity(0.2)],
                                                         startPoint: .topLeading,
                                                         endPoint: .bottomTrailing
                                                     ),
-                                                    lineWidth: 1
+                                                    lineWidth: 0.5
                                                 )
                                         )
-                                        .glow(color: RoxyColors.cyan, radius: 8)
+                                        .shadow(color: RoxyColors.neonCyan.opacity(0.15), radius: 3, x: 0, y: 1)
                                 } else {
                                     Color.clear
                                 }
@@ -84,12 +85,12 @@ struct ContentView: View {
                             VStack(spacing: RoxySpacing.md) {
                                 Image(systemName: "sparkles")
                                     .font(.system(size: 48, weight: .light))
-                                    .foregroundColor(RoxyColors.cyan)
-                                    .pulsingGlow(color: RoxyColors.cyan)
+                                    .foregroundColor(RoxyColors.neonCyan)
+                                    .shadow(color: RoxyColors.neonCyan.opacity(0.3), radius: 4, x: 0, y: 2)
 
                                 Text("Select an item")
                                     .font(RoxyFonts.title2)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(RoxyColors.neonWhite)
                             }
                         }
                         .frame(maxWidth: 300)

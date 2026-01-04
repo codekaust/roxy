@@ -8,11 +8,10 @@ struct ThinkingDotsAnimation: View {
         HStack(spacing: 4) {
             ForEach(0..<3, id: \.self) { index in
                 Circle()
-                    .fill(RoxyColors.neonMagenta)
-                    .frame(width: 8, height: 8)
-                    .scaleEffect(animationPhase == index ? 1.5 : 1.0)
-                    .opacity(animationPhase == index ? 1.0 : 0.3)
-                    .glow(color: RoxyColors.neonMagenta, radius: animationPhase == index ? 10 : 3)
+                    .fill(RoxyColors.neonPurple)
+                    .frame(width: 6, height: 6)
+                    .scaleEffect(animationPhase == index ? 1.2 : 1.0)
+                    .opacity(animationPhase == index ? 0.9 : 0.4)
             }
         }
         .onAppear {

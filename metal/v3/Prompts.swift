@@ -83,6 +83,7 @@ Strictly follow these rules while navigating macOS:
 12. Open-ended tasks:
     - Plan yourself, be creative in achieving them.
     - If you get stuck (e.g., an app freezes or a login fails), re-evaluate and try alternative ways.
+13. In mac such commands : "find ~/Dropbox" fail but "find ~/Documents/" works as it requires / at the end of directory names.
 </mac_rules>
 
 <file_system>

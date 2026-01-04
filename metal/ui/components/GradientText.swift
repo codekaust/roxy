@@ -57,7 +57,7 @@ struct AnimatedGradientText: View {
 
     init(
         _ text: String,
-        colors: [Color] = [RoxyColors.cyan, RoxyColors.purple, RoxyColors.pink],
+        colors: [Color] = [RoxyColors.neonCyan, RoxyColors.neonPurple, RoxyColors.neonPink],
         font: Font = RoxyFonts.title,
         fontWeight: Font.Weight = .bold
     ) {
@@ -97,10 +97,10 @@ struct GlowingText: View {
 
     init(
         _ text: String,
-        color: Color = RoxyColors.cyan,
+        color: Color = RoxyColors.neonCyan,
         font: Font = RoxyFonts.title,
         fontWeight: Font.Weight = .bold,
-        glowRadius: CGFloat = 10
+        glowRadius: CGFloat = 4
     ) {
         self.text = text
         self.color = color
@@ -130,11 +130,11 @@ struct PulsingGlowText: View {
 
     init(
         _ text: String,
-        color: Color = RoxyColors.cyan,
+        color: Color = RoxyColors.neonCyan,
         font: Font = RoxyFonts.title,
         fontWeight: Font.Weight = .bold,
-        minRadius: CGFloat = 5,
-        maxRadius: CGFloat = 15
+        minRadius: CGFloat = 2,
+        maxRadius: CGFloat = 5
     ) {
         self.text = text
         self.color = color

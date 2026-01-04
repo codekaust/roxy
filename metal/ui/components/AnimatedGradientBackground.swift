@@ -15,7 +15,7 @@ struct AnimatedGradientBackground: View {
             if reduceMotion {
                 // Static gradient for reduce motion
                 LinearGradient(
-                    colors: [RoxyColors.purple, RoxyColors.teal, RoxyColors.cyan],
+                    colors: [RoxyColors.pureBlack, RoxyColors.darkGray.opacity(0.5), RoxyColors.pureBlack],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -23,9 +23,9 @@ struct AnimatedGradientBackground: View {
                 // Animated gradient
                 LinearGradient(
                     colors: [
-                        RoxyColors.purple,
-                        RoxyColors.teal,
-                        RoxyColors.cyan
+                        RoxyColors.pureBlack,
+                        RoxyColors.darkGray.opacity(0.5),
+                        RoxyColors.pureBlack
                     ],
                     startPoint: animateGradient ? .topLeading : .bottomLeading,
                     endPoint: animateGradient ? .bottomTrailing : .topTrailing
@@ -69,16 +69,16 @@ struct SimpleAnimatedBackground: View {
             // Base gradient
             if reduceMotion {
                 LinearGradient(
-                    colors: [RoxyColors.purple, RoxyColors.teal, RoxyColors.cyan],
+                    colors: [RoxyColors.pureBlack, RoxyColors.darkGray.opacity(0.5), RoxyColors.pureBlack],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             } else {
                 LinearGradient(
                     colors: [
-                        RoxyColors.purple,
-                        RoxyColors.teal,
-                        RoxyColors.cyan
+                        RoxyColors.pureBlack,
+                        RoxyColors.darkGray.opacity(0.5),
+                        RoxyColors.pureBlack
                     ],
                     startPoint: animateGradient ? .topLeading : .bottomLeading,
                     endPoint: animateGradient ? .bottomTrailing : .topTrailing

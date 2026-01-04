@@ -19,17 +19,17 @@ struct GlassmorphicCard<Content: View>: View {
         var tintColor: Color {
             switch self {
             case .primary:
-                return RoxyColors.cyan
+                return RoxyColors.neonCyan
             case .secondary:
-                return RoxyColors.purple
+                return RoxyColors.neonPurple
             case .accent:
-                return RoxyColors.pink
+                return RoxyColors.neonPink
             case .success:
-                return RoxyColors.lime
+                return RoxyColors.neonGreen
             case .warning:
-                return RoxyColors.orange
+                return RoxyColors.neonOrange
             case .error:
-                return RoxyColors.pink
+                return RoxyColors.neonPink
             }
         }
     }
@@ -114,8 +114,8 @@ struct GlassmorphicContainer<Content: View>: View {
     let showBorder: Bool
 
     init(
-        tintColor: Color = RoxyColors.cyan,
-        opacity: Double = 0.7,
+        tintColor: Color = RoxyColors.neonCyan,
+        opacity: Double = 0.4,
         cornerRadius: CGFloat = RoxyCornerRadius.lg,
         showBorder: Bool = true,
         @ViewBuilder content: () -> Content
@@ -131,15 +131,17 @@ struct GlassmorphicContainer<Content: View>: View {
         content
             .background(
                 ZStack {
+                    // Dark base
+                    RoxyColors.surfaceGray
                     // Gradient background
                     LinearGradient(
-                        colors: [tintColor.opacity(0.2), tintColor.opacity(0.05)],
+                        colors: [tintColor.opacity(0.08), tintColor.opacity(0.02)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                     // Blur material
                     Rectangle()
-                        .fill(Material.ultraThinMaterial)
+                        .fill(Material.ultraThin)
                         .opacity(opacity)
                 }
             )
@@ -149,13 +151,14 @@ struct GlassmorphicContainer<Content: View>: View {
                         RoundedRectangle(cornerRadius: cornerRadius)
                             .stroke(
                                 RoxyGradients.glassBorder,
-                                lineWidth: 1
+                                lineWidth: 0.5
                             )
                     }
                 }
             )
             .cornerRadius(cornerRadius)
-            .shadow(color: tintColor.opacity(0.3), radius: 20, x: 0, y: 10)
+            .shadow(color: tintColor.opacity(0.2), radius: 4, x: 0, y: 2)
+            .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
     }
 }
 
