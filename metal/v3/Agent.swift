@@ -147,6 +147,17 @@ class Agent {
         await OverlayManager.shared.clear()
         LogManager.shared.info("--- Agent Stopped ---")
 
+        // Learn from completed task (only if enabled)
+        if let memManager = self.memoryManager {
+            Task.detached {
+                await PreferenceManager.shared.learnFromTask(
+                    task: initialTask,
+                    history: memManager.historyItems,
+                    finalResult: self.state.lastResult,
+                    fileSystem: self.fileSystem
+                )
+            }
+        }
     }
 }
 

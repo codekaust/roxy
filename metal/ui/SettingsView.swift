@@ -4,6 +4,7 @@ struct SettingsView: View {
     @AppStorage("showDebugOverlay") private var showDebugOverlay = true
     @AppStorage("autoRefreshOverlay") private var autoRefreshOverlay = false
     @AppStorage("enableWebServer") private var enableWebServer = false
+    @AppStorage("preferenceLearningEnabled") private var preferenceLearningEnabled = true
     @ObservedObject private var ttsManager = TTSManager.shared
     @ObservedObject private var permissionManager = PermissionManager.shared
     @ObservedObject private var configManager = ConfigurationManager.shared
@@ -361,9 +362,65 @@ struct SettingsView: View {
                 }
             }
 
+            Section(header: Text("User Preferences")
+                .foregroundColor(RoxyColors.neonCyan)
+                .font(RoxyFonts.headline)) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Toggle(isOn: $preferenceLearningEnabled) {
+                        VStack(alignment: .leading) {
+                            Text("Enable Preference Learning")
+                                .font(.headline)
+                            Text("Automatically learn and remember your preferences (contacts, apps, workflow) from completed tasks")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .toggleStyle(.switch)
+
+                    if preferenceLearningEnabled {
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "brain")
+                                    .foregroundColor(RoxyColors.neonPurple)
+                                Text("Learning Status")
+                                    .font(.subheadline)
+                                Spacer()
+                                Text("Active")
+                                    .font(.caption)
+                                    .foregroundColor(RoxyColors.success)
+                            }
+
+                            Text("Roxy will analyze completed tasks to learn your preferences and use them in future tasks for faster execution.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Divider()
+
+                        HStack {
+                            Button("View Preferences File") {
+                                let path = PreferenceManager.shared.getPreferencesPath()
+                                NSWorkspace.shared.selectFile(path.path, inFileViewerRootedAtPath: path.deletingLastPathComponent().path)
+                            }
+                            .buttonStyle(.bordered)
+
+                            Button("Clear All Preferences") {
+                                if PreferenceManager.shared.clearAllPreferences() {
+                                    LogManager.shared.info("Preferences cleared successfully")
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(.red)
+                        }
+                    }
+                }
+            }
+
         }
         .scrollContentBackground(.hidden)
-        .background(Color.black)
+        .background(RoxyColors.background)
         .padding()
         .navigationTitle("Settings")
         .sheet(isPresented: $showPermissionView) {

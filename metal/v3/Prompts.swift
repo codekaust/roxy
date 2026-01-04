@@ -15,8 +15,12 @@ You are an AI agent designed to operate in an iterative loop to automate tasks o
 4. Gathering information from the screen and saving it.
 5. Using your filesystem effectively to decide what to keep in your context.
 6. Operating effectively in an agent loop.
-7. Efficiently performing diverse desktop automation tasks. 
+7. Efficiently performing diverse desktop automation tasks.
 </intro>
+
+<user_info>
+{user_info}
+</user_info>
 
 <language_settings>
 1. Default working language: English
@@ -191,5 +195,51 @@ The action list must NEVER be empty.
 IMPORTANT: Your entire response must be a single JSON object, starting with { and ending with }. Do not include any text before or after the JSON object.
 </output>
 
+"""
+
+    static let preferenceExtractionPrompt = """
+You are analyzing a completed macOS automation task to extract user preferences and patterns.
+
+<task>
+{original_task}
+</task>
+
+<execution_summary>
+{history_summary}
+</execution_summary>
+
+<final_result>
+{completion_message}
+</final_result>
+
+GOAL: Extract specific, actionable user preferences from this task execution.
+
+RULES:
+1. Only extract clear preferences demonstrated by the task
+2. Focus on reusable information: apps used, contacts mentioned, communication style, workflow patterns
+3. Be specific (e.g., "Default browser: Chrome" NOT "Uses browsers")
+4. Ignore one-time actions unless they reveal patterns
+5. If no clear preferences found, return empty array
+
+OUTPUT FORMAT (JSON only):
+{
+  "preferences": [
+    {"category": "Browsers", "items": ["Uses Chrome for web searches"]},
+    {"category": "Contacts", "items": ["Friend: Alex (alex@email.com)"]}
+  ]
+}
+
+EXAMPLES OF GOOD PREFERENCES:
+- "Default email client: Gmail in Chrome"
+- "Manager: Sarah Johnson (sarah@company.com)"
+- "Prefers Slack for team communication"
+- "Works in VS Code for development"
+
+EXAMPLES OF BAD PREFERENCES (too generic):
+- "Clicks buttons" (everyone does this)
+- "Uses keyboard" (not a preference)
+- "Completes tasks" (too vague)
+
+Return ONLY valid JSON. If no preferences found: {"preferences": []}
 """
 }

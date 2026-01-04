@@ -11,9 +11,9 @@ class SystemPromptLoader {
         // Replacements
         prompt = prompt.replacingOccurrences(of: "{max_actions}", with: String(settings.maxActionsPerStep))
         prompt = prompt.replacingOccurrences(of: "{available_actions}", with: actionsDesc)
-        
-        // Add User Info if needed (mocked for now)
-        let userInfo = "User: macOS Owner"
+
+        // Add User Info with preferences
+        let userInfo = PreferenceManager.shared.getUserInfoSection()
         prompt = prompt.replacingOccurrences(of: "{user_info}", with: userInfo)
         
         return prompt

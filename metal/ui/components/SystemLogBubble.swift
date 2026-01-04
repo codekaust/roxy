@@ -6,9 +6,9 @@ struct SystemLogBubble: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: RoxySpacing.xs) {
-            // Icon with subtle accent
+            // Simple icon
             Image(systemName: iconForLogLevel(log.level))
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundColor(colorForLogLevel(log.level))
                 .frame(width: 16)
 
@@ -16,37 +16,20 @@ struct SystemLogBubble: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(log.formattedMessage)
                     .font(RoxyFonts.caption)
-                    .foregroundColor(RoxyColors.dimWhite)
+                    .foregroundColor(RoxyColors.textSecondary)
                     .lineLimit(2)
 
                 Text(log.timestamp, style: .time)
                     .font(.system(size: 10, design: .default))
-                    .foregroundColor(RoxyColors.mutedWhite)
+                    .foregroundColor(RoxyColors.textTertiary)
             }
         }
         .padding(RoxySpacing.xs)
-        .background(
-            ZStack {
-                // Dark refined base
-                RoundedRectangle(cornerRadius: RoxyCornerRadius.sm)
-                    .fill(RoxyColors.darkGray)
-
-                // Very subtle colored overlay
-                RoundedRectangle(cornerRadius: RoxyCornerRadius.sm)
-                    .fill(Color(colorForLogLevel(log.level).opacity(0.08)))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: RoxyCornerRadius.sm)
-                            .strokeBorder(
-                                colorForLogLevel(log.level).opacity(0.3),
-                                lineWidth: 0.5
-                            )
-                    )
-            }
-        )
+        .background(RoxyColors.surface)
+        .cornerRadius(RoxyCornerRadius.sm)
         .opacity(hasAppeared ? 1 : 0)
-        .scaleEffect(hasAppeared ? 1 : 0.95)
         .onAppear {
-            withAnimation(RoxyAnimation.fadeIn.delay(0.05)) {
+            withAnimation(.easeOut(duration: 0.2)) {
                 hasAppeared = true
             }
         }
@@ -54,14 +37,14 @@ struct SystemLogBubble: View {
 
     func colorForLogLevel(_ level: LogEntry.LogLevel) -> Color {
         switch level {
-        case .thinking: return RoxyColors.thinking
-        case .sensing: return RoxyColors.cyan
-        case .acting: return RoxyColors.acting
+        case .thinking: return RoxyColors.info
+        case .sensing: return RoxyColors.accent
+        case .acting: return RoxyColors.warning
         case .success: return RoxyColors.success
         case .error: return RoxyColors.error
         case .warning: return RoxyColors.warning
-        case .goal: return RoxyColors.lime
-        default: return .secondary
+        case .goal: return RoxyColors.success
+        default: return RoxyColors.textSecondary
         }
     }
 

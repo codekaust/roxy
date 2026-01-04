@@ -8,16 +8,17 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Animated gradient background
-            SimpleAnimatedBackground(intensity: backgroundIntensity)
+            // Clean solid background
+            RoxyColors.background
+                .ignoresSafeArea()
 
             // Main content
             NavigationSplitView {
-                // Sidebar with dark theme
+                // Sidebar with clean dark theme
                 ZStack {
-                    // Dark background for sidebar
+                    // Clean dark background for sidebar
                     Rectangle()
-                        .fill(RoxyColors.darkGray)
+                        .fill(RoxyColors.sidebarBg)
 
                     List(SidebarItem.allCases, selection: $selectedItem) { item in
                         NavigationLink(value: item) {

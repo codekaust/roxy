@@ -28,7 +28,7 @@ struct AgentView: View {
                 isVoiceActive: voiceAgent.isListening
             )
         }
-        .background(Color.black)  // Pure black OLED background
+        .background(RoxyColors.background)  // Clean ChatGPT-style background
         .onAppear(perform: initializeAgent)
     }
 
@@ -37,16 +37,13 @@ struct AgentView: View {
     var chatHeader: some View {
         HStack {
             AIStatusVisualization(state: currentAIState)
-                .frame(width: 50, height: 50)
+                .frame(width: 40, height: 40)
 
             VStack(alignment: .leading, spacing: 4) {
-                GradientText(
-                    "Roxy",
-                    gradient: RoxyGradients.cyanPurple,
-                    font: RoxyFonts.title2,
-                    fontWeight: .bold,
-                    shimmer: true
-                )
+                Text("Roxy")
+                    .font(RoxyFonts.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(RoxyColors.textPrimary)
 
                 Text(statusText)
                     .font(RoxyFonts.caption)
@@ -66,10 +63,12 @@ struct AgentView: View {
             }
         }
         .padding(RoxySpacing.md)
-        .darkGlassEffect(
-            tint: RoxyColors.neonPurple,
-            neonBorder: RoxyGradients.neonBorderMagenta,
-            opacity: 0.2
+        .background(RoxyColors.surface)
+        .overlay(
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(RoxyColors.borderLight),
+            alignment: .bottom
         )
     }
 

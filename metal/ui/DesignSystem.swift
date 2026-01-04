@@ -27,145 +27,160 @@ extension Color {
 // MARK: - Roxy Colors
 
 struct RoxyColors {
-    // Sleek Futuristic Palette - Refined and sophisticated
-    static let neonCyan = Color(hex: "4FC3F7")       // Soft cyan
-    static let neonMagenta = Color(hex: "BA68C8")    // Soft magenta
-    static let neonBlue = Color(hex: "5C6BC0")       // Deep refined blue
-    static let neonGreen = Color(hex: "66BB6A")      // Soft green
-    static let neonPink = Color(hex: "EC407A")       // Refined pink
-    static let neonPurple = Color(hex: "9575CD")     // Soft purple
-    static let neonOrange = Color(hex: "FF7043")     // Soft orange
+    // ChatGPT-inspired clean color palette (Dark Mode)
 
-    // Backgrounds - Dark but sophisticated
-    static let pureBlack = Color(hex: "000000")      // Pure OLED black
-    static let darkGray = Color(hex: "0D0D0D")       // Very dark gray for subtle contrast
-    static let darkerGray = Color(hex: "1A1A1A")     // Card backgrounds
-    static let surfaceGray = Color(hex: "212121")    // Surface elements
+    // Main backgrounds
+    static let background = Color(hex: "212121")        // Main chat background
+    static let backgroundAlt = Color(hex: "2F2F2F")     // Alternate background (user messages)
+    static let surface = Color(hex: "3A3A3A")           // Surface elements (cards, inputs)
 
-    // Text - High contrast but not harsh
-    static let neonWhite = Color(hex: "FFFFFF")      // Pure white for text
-    static let dimWhite = Color(hex: "B0B0B0")       // Dimmed white for secondary text
-    static let mutedWhite = Color(hex: "808080")     // Very subtle text
+    // Sidebar
+    static let sidebarBg = Color(hex: "171717")         // Sidebar background
+    static let sidebarHover = Color(hex: "2A2A2A")      // Sidebar item hover
+    static let sidebarActive = Color(hex: "2F2F2F")     // Sidebar active item
 
-    // Legacy colors (kept for backwards compatibility)
-    static let cyan = neonCyan
-    static let purple = neonPurple
-    static let teal = neonBlue
-    static let pink = neonPink
-    static let orange = neonOrange
-    static let lime = neonGreen
-    static let navy = darkGray
+    // Text colors
+    static let textPrimary = Color(hex: "ECECEC")       // Primary text
+    static let textSecondary = Color(hex: "B4B4B4")     // Secondary text
+    static let textTertiary = Color(hex: "8E8E8E")      // Tertiary/muted text
 
-    // Semantic Colors
-    static let success = neonGreen
-    static let error = neonPink
-    static let warning = neonOrange
-    static let info = neonCyan
+    // Accent colors (ChatGPT teal)
+    static let accent = Color(hex: "10A37F")            // Primary accent
+    static let accentHover = Color(hex: "1A7F64")       // Accent hover
 
-    // State Colors
-    static let idle = neonCyan
-    static let listening = neonGreen
-    static let thinking = neonPurple
-    static let acting = neonMagenta
+    // Borders & dividers
+    static let border = Color(hex: "4E4E4E")            // Standard border
+    static let borderLight = Color(hex: "3A3A3A")       // Light border/divider
 
-    // Glass Tints (updated for dark theme)
-    static let glassCyan = neonCyan.opacity(0.2)
-    static let glassPurple = neonPurple.opacity(0.2)
-    static let glassPink = neonPink.opacity(0.2)
-    static let glassOrange = neonOrange.opacity(0.2)
+    // Status colors (subtle, not poppy)
+    static let success = Color(hex: "10A37F")           // Success/green
+    static let error = Color(hex: "EF4444")             // Error/red
+    static let warning = Color(hex: "F59E0B")           // Warning/amber
+    static let info = Color(hex: "3B82F6")              // Info/blue
+
+    // Legacy aliases for backward compatibility
+    static let neonCyan = accent
+    static let neonMagenta = info
+    static let neonBlue = info
+    static let neonGreen = success
+    static let neonPink = error
+    static let neonPurple = info
+    static let neonOrange = warning
+    static let pureBlack = Color(hex: "000000")
+    static let darkGray = sidebarBg
+    static let darkerGray = sidebarBg
+    static let surfaceGray = surface
+    static let neonWhite = textPrimary
+    static let dimWhite = textSecondary
+    static let mutedWhite = textTertiary
+    static let cyan = accent
+    static let purple = info
+    static let teal = accent
+    static let pink = error
+    static let orange = warning
+    static let lime = success
+    static let navy = sidebarBg
+    static let idle = accent
+    static let listening = success
+    static let thinking = info
+    static let acting = warning
+    static let glassCyan = accent.opacity(0.1)
+    static let glassPurple = info.opacity(0.1)
+    static let glassPink = error.opacity(0.1)
+    static let glassOrange = warning.opacity(0.1)
 }
 
 // MARK: - Roxy Gradients
 
 struct RoxyGradients {
-    // Background Gradients - Pure black for OLED
-    static let background = Color.black
+    // Simple, clean backgrounds (no fancy gradients)
+    static let background = RoxyColors.background
 
     static let backgroundAlternate = LinearGradient(
-        colors: [RoxyColors.pureBlack, RoxyColors.darkGray],
+        colors: [RoxyColors.background, RoxyColors.backgroundAlt],
         startPoint: .top,
         endPoint: .bottom
     )
 
-    // Neon Accent Gradients
+    // Simple accent gradients (for buttons only)
     static let cyanPurple = LinearGradient(
-        colors: [RoxyColors.neonCyan, RoxyColors.neonPurple],
+        colors: [RoxyColors.accent, RoxyColors.accent],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let cyanMagenta = LinearGradient(
-        colors: [RoxyColors.neonCyan, RoxyColors.neonMagenta],
+        colors: [RoxyColors.accent, RoxyColors.accent],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let purpleBlue = LinearGradient(
-        colors: [RoxyColors.neonPurple, RoxyColors.neonBlue],
+        colors: [RoxyColors.info, RoxyColors.info],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let pinkOrange = LinearGradient(
-        colors: [RoxyColors.neonPink, RoxyColors.neonOrange],
+        colors: [RoxyColors.error, RoxyColors.error],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let cyanGreen = LinearGradient(
-        colors: [RoxyColors.neonCyan, RoxyColors.neonGreen],
+        colors: [RoxyColors.accent, RoxyColors.success],
         startPoint: .bottom,
         endPoint: .top
     )
 
-    // Neon Border Gradients (full opacity for cyberpunk look)
+    // Simple border gradients (minimal)
     static let neonBorderCyan = LinearGradient(
-        colors: [RoxyColors.neonCyan, RoxyColors.neonBlue],
+        colors: [RoxyColors.border, RoxyColors.border],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let neonBorderMagenta = LinearGradient(
-        colors: [RoxyColors.neonMagenta, RoxyColors.neonPurple],
+        colors: [RoxyColors.border, RoxyColors.border],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let neonBorderGreen = LinearGradient(
-        colors: [RoxyColors.neonGreen, RoxyColors.neonCyan],
+        colors: [RoxyColors.border, RoxyColors.border],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
-    // Status Gradients
+    // Status gradients (simple, single color)
     static let listening = LinearGradient(
-        colors: [RoxyColors.neonGreen, RoxyColors.neonCyan],
+        colors: [RoxyColors.success, RoxyColors.success],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let thinking = LinearGradient(
-        colors: [RoxyColors.neonPurple, RoxyColors.neonBlue, RoxyColors.neonCyan],
+        colors: [RoxyColors.info, RoxyColors.info],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let acting = LinearGradient(
-        colors: [RoxyColors.neonOrange, RoxyColors.neonPink],
+        colors: [RoxyColors.warning, RoxyColors.warning],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
-    // Glass Border Gradients (darker for dark theme)
+    // Simple border (no gradient)
     static let glassBorder = LinearGradient(
-        colors: [Color.white.opacity(0.3), Color.white.opacity(0.05)],
+        colors: [RoxyColors.border, RoxyColors.border],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
-    // Shimmer Gradient (neon colors)
+    // Simple shimmer (just accent color)
     static let shimmer = Gradient(
-        colors: [RoxyColors.neonCyan, RoxyColors.neonPurple, RoxyColors.neonMagenta, RoxyColors.neonCyan]
+        colors: [RoxyColors.accent, RoxyColors.accent, RoxyColors.accent, RoxyColors.accent]
     )
 }
 
@@ -194,24 +209,24 @@ struct RoxyCornerRadius {
 // MARK: - Roxy Fonts
 
 struct RoxyFonts {
-    // Display fonts (SF Pro Display - for headlines)
-    static let titleLarge = Font.system(size: 36, weight: .heavy, design: .default)
-    static let title = Font.system(size: 30, weight: .bold, design: .default)
-    static let title2 = Font.system(size: 24, weight: .bold, design: .default)
-    static let title3 = Font.system(size: 20, weight: .semibold, design: .default)
+    // Clean, readable fonts (ChatGPT style - simpler weights)
+    static let titleLarge = Font.system(size: 28, weight: .semibold, design: .default)
+    static let title = Font.system(size: 24, weight: .semibold, design: .default)
+    static let title2 = Font.system(size: 20, weight: .semibold, design: .default)
+    static let title3 = Font.system(size: 18, weight: .medium, design: .default)
 
-    // Text fonts (SF Pro Text - for body)
-    static let headline = Font.system(size: 18, weight: .semibold, design: .default)
-    static let bodyLarge = Font.system(size: 19, weight: .medium, design: .default)  // Chat messages
-    static let body = Font.system(size: 17, weight: .regular, design: .default)
-    static let caption = Font.system(size: 14, weight: .medium, design: .default)    // Timestamps
-    static let caption2 = Font.system(size: 13, weight: .regular, design: .default)
+    // Body text (clean and readable)
+    static let headline = Font.system(size: 16, weight: .medium, design: .default)
+    static let bodyLarge = Font.system(size: 16, weight: .regular, design: .default)  // Chat messages
+    static let body = Font.system(size: 14, weight: .regular, design: .default)
+    static let caption = Font.system(size: 13, weight: .regular, design: .default)    // Timestamps
+    static let caption2 = Font.system(size: 12, weight: .regular, design: .default)
 
-    // Monospace for technical elements
-    static let mono = Font.system(size: 15, weight: .medium, design: .monospaced)
+    // Monospace for code/technical
+    static let mono = Font.system(size: 14, weight: .regular, design: .monospaced)
 }
 
-// MARK: - Glass Effect Modifier
+// MARK: - Glass Effect Modifier (Simplified - no fancy effects)
 
 struct GlassEffect: ViewModifier {
     var tintColor: Color
@@ -220,75 +235,30 @@ struct GlassEffect: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .background(
-                ZStack {
-                    // Gradient background
-                    LinearGradient(
-                        colors: [tintColor.opacity(0.2), tintColor.opacity(0.05)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    // Blur material
-                    Rectangle()
-                        .fill(Material.ultraThinMaterial)
-                        .opacity(opacity)
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(
-                        RoxyGradients.glassBorder,
-                        lineWidth: 1
-                    )
-            )
+            .background(RoxyColors.surface)
             .cornerRadius(cornerRadius)
-            .shadow(color: tintColor.opacity(0.3), radius: 20, x: 0, y: 10)
     }
 }
 
 extension View {
-    func glassEffect(tint: Color = RoxyColors.cyan, opacity: Double = 0.7, cornerRadius: CGFloat = RoxyCornerRadius.lg) -> some View {
+    func glassEffect(tint: Color = RoxyColors.accent, opacity: Double = 0.7, cornerRadius: CGFloat = RoxyCornerRadius.lg) -> some View {
         self.modifier(GlassEffect(tintColor: tint, opacity: opacity, cornerRadius: cornerRadius))
     }
 }
 
-// MARK: - Dark Glass Effect Modifier (Sleek Futuristic)
+// MARK: - Dark Glass Effect Modifier (Simplified)
 
 struct DarkGlassEffect: ViewModifier {
     var tintColor: Color
     var neonBorderGradient: LinearGradient
-    var opacity: Double = 0.4  // Slightly more visible glass
+    var opacity: Double = 0.4
     var cornerRadius: CGFloat = RoxyCornerRadius.lg
-    var glowRadius: CGFloat = 4  // Subtle refined glow
+    var glowRadius: CGFloat = 4
 
     func body(content: Content) -> some View {
         content
-            .background(
-                ZStack {
-                    // Dark sophisticated background
-                    RoxyColors.surfaceGray
-
-                    // Very subtle tint overlay
-                    LinearGradient(
-                        colors: [tintColor.opacity(0.08), tintColor.opacity(0.02)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-
-                    // Refined blur material
-                    Rectangle()
-                        .fill(Material.ultraThin)
-                        .opacity(opacity)
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .strokeBorder(neonBorderGradient, lineWidth: 0.5)  // Thin refined border
-            )
+            .background(RoxyColors.surface)
             .cornerRadius(cornerRadius)
-            // Subtle sophisticated glow
-            .shadow(color: tintColor.opacity(0.2), radius: glowRadius, x: 0, y: 2)
-            .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)  // Depth shadow
     }
 }
 
@@ -310,17 +280,14 @@ extension View {
     }
 }
 
-// MARK: - Glow Modifier
+// MARK: - Glow Modifier (Removed - no glows in clean design)
 
 struct GlowModifier: ViewModifier {
     var color: Color
     var radius: CGFloat = 10
 
     func body(content: Content) -> some View {
-        content
-            .shadow(color: color.opacity(0.6), radius: radius, x: 0, y: 0)
-            .shadow(color: color.opacity(0.4), radius: radius * 1.5, x: 0, y: 0)
-            .shadow(color: color.opacity(0.2), radius: radius * 2, x: 0, y: 0)
+        content  // No glow effect
     }
 }
 
@@ -330,7 +297,7 @@ extension View {
     }
 }
 
-// MARK: - Pulsing Glow Modifier
+// MARK: - Pulsing Glow Modifier (Removed - no animations)
 
 struct PulsingGlow: ViewModifier {
     var color: Color
@@ -340,13 +307,7 @@ struct PulsingGlow: ViewModifier {
     @State private var animateGlow = false
 
     func body(content: Content) -> some View {
-        content
-            .glow(color: color, radius: animateGlow ? maxRadius : minRadius)
-            .onAppear {
-                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                    animateGlow = true
-                }
-            }
+        content  // No pulsing glow
     }
 }
 
@@ -356,30 +317,30 @@ extension View {
     }
 }
 
-// MARK: - Gradient Border Modifier
+// MARK: - Gradient Border Modifier (Simplified - solid border)
 
 struct GradientBorder: ViewModifier {
     var gradient: LinearGradient
-    var lineWidth: CGFloat = 2
+    var lineWidth: CGFloat = 1
     var cornerRadius: CGFloat = RoxyCornerRadius.lg
 
     func body(content: Content) -> some View {
         content
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .strokeBorder(gradient, lineWidth: lineWidth)
+                    .stroke(RoxyColors.border, lineWidth: lineWidth)
             )
             .cornerRadius(cornerRadius)
     }
 }
 
 extension View {
-    func gradientBorder(gradient: LinearGradient, lineWidth: CGFloat = 2, cornerRadius: CGFloat = RoxyCornerRadius.lg) -> some View {
+    func gradientBorder(gradient: LinearGradient, lineWidth: CGFloat = 1, cornerRadius: CGFloat = RoxyCornerRadius.lg) -> some View {
         self.modifier(GradientBorder(gradient: gradient, lineWidth: lineWidth, cornerRadius: cornerRadius))
     }
 }
 
-// MARK: - Breathing Animation Modifier
+// MARK: - Breathing Animation Modifier (Removed - no animations)
 
 struct BreathingEffect: ViewModifier {
     @State private var isAnimating = false
@@ -388,13 +349,7 @@ struct BreathingEffect: ViewModifier {
     var duration: Double = 1.5
 
     func body(content: Content) -> some View {
-        content
-            .scaleEffect(isAnimating ? maxScale : minScale)
-            .onAppear {
-                withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
-                    isAnimating = true
-                }
-            }
+        content  // No breathing effect
     }
 }
 

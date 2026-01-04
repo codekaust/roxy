@@ -15,30 +15,10 @@ struct ChatInputBar: View {
                 text: $text
             )
             .font(RoxyFonts.bodyLarge)
-            .foregroundColor(isDisabled ? RoxyColors.mutedWhite : RoxyColors.neonWhite)
+            .foregroundColor(isDisabled ? RoxyColors.textTertiary : RoxyColors.textPrimary)
             .padding(RoxySpacing.md)
-            .background(
-                RoundedRectangle(cornerRadius: RoxyCornerRadius.lg)
-                    .fill(RoxyColors.surfaceGray)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: RoxyCornerRadius.lg)
-                            .stroke(
-                                isDisabled ?
-                                    LinearGradient(
-                                        colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.2)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ) :
-                                    LinearGradient(
-                                        colors: [RoxyColors.neonCyan.opacity(0.4), RoxyColors.neonBlue.opacity(0.3)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                lineWidth: 0.5
-                            )
-                    )
-            )
-            .shadow(color: isDisabled ? .clear : RoxyColors.neonCyan.opacity(0.15), radius: 4, x: 0, y: 2)
+            .background(RoxyColors.surface)
+            .cornerRadius(RoxyCornerRadius.lg)
             .disabled(isDisabled)
             .onSubmit {
                 if !isDisabled {
@@ -70,10 +50,6 @@ struct ChatInputBar: View {
             .opacity(isDisabled || text.isEmpty ? 0.5 : 1.0)
         }
         .padding(RoxySpacing.md)
-        .darkGlassEffect(
-            tint: RoxyColors.neonCyan,
-            neonBorder: RoxyGradients.neonBorderCyan,
-            opacity: 0.2
-        )
+        .background(RoxyColors.background)
     }
 }
