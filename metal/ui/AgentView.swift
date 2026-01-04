@@ -23,7 +23,7 @@ struct AgentView: View {
             
             // --- HEADER ---
             HStack {
-                Text("Panda Agent")
+                Text("Roxy")
                     .font(.title2)
                     .fontWeight(.bold)
                 Spacer()

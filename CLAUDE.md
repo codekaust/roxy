@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Metal is a macOS desktop automation agent built with Swift/SwiftUI. It uses voice commands, screen perception via accessibility APIs, and Google Gemini LLM to autonomously control macOS applications. The UI is branded as "Panda Agent".
+Metal is a macOS desktop automation agent built with Swift/SwiftUI. It uses voice commands, screen perception via accessibility APIs, and Google Gemini LLM to autonomously control macOS applications. The UI is branded as "Roxy".
 
 ## Build Commands
 
