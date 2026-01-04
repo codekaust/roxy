@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2AA202C72EF63E3900D74F5D /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA202C52EF63E3900D74F5B /* Vortex */; };
+		2AA202C82EF63E3900D74F5E /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA202C62EF63E3900D74F5C /* Shimmer */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2AA202A72EF63E3900D74F58 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2AA202C72EF63E3900D74F5D /* Vortex in Frameworks */,
+				2AA202C82EF63E3900D74F5E /* Shimmer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +119,8 @@
 			);
 			name = metal;
 			packageProductDependencies = (
+				2AA202C52EF63E3900D74F5B /* Vortex */,
+				2AA202C62EF63E3900D74F5C /* Shimmer */,
 			);
 			productName = metal;
 			productReference = 2AA202982EF63E3800D74F58 /* metal.app */;
@@ -195,6 +204,10 @@
 			);
 			mainGroup = 2AA2028F2EF63E3800D74F58;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2AA202C32EF63E3900D74F59 /* XCRemoteSwiftPackageReference "Vortex" */,
+				2AA202C42EF63E3900D74F5A /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2AA202992EF63E3800D74F58 /* Products */;
 			projectDirPath = "";
@@ -556,6 +569,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2AA202C32EF63E3900D74F59 /* XCRemoteSwiftPackageReference "Vortex" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/Vortex";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		2AA202C42EF63E3900D74F5A /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2AA202C52EF63E3900D74F5B /* Vortex */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AA202C32EF63E3900D74F59 /* XCRemoteSwiftPackageReference "Vortex" */;
+			productName = Vortex;
+		};
+		2AA202C62EF63E3900D74F5C /* Shimmer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AA202C42EF63E3900D74F5A /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
+			productName = Shimmer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2AA202902EF63E3800D74F58 /* Project object */;
 }

@@ -3,31 +3,102 @@ import SwiftUI
 struct ContentView: View {
     @State private var selectedItem: SidebarItem? = .agent
     @State private var showPermissionView: Bool = false
+    @State private var backgroundIntensity: Double = 0.5
     @ObservedObject private var permissionManager = PermissionManager.shared
 
     var body: some View {
-        NavigationSplitView {
-            List(SidebarItem.allCases, selection: $selectedItem) { item in
-                NavigationLink(value: item) {
-                    Label(item.title, systemImage: item.icon)
+        ZStack {
+            // Animated gradient background
+            SimpleAnimatedBackground(intensity: backgroundIntensity)
+
+            // Main content
+            NavigationSplitView {
+                // Sidebar with glassmorphism
+                ZStack {
+                    // Slight tinted background for sidebar
+                    Rectangle()
+                        .fill(RoxyColors.purple.opacity(0.1))
+
+                    List(SidebarItem.allCases, selection: $selectedItem) { item in
+                        NavigationLink(value: item) {
+                            Label {
+                                Text(item.title)
+                                    .font(RoxyFonts.body)
+                                    .fontWeight(.semibold)
+                            } icon: {
+                                Image(systemName: item.icon)
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(selectedItem == item ? RoxyColors.cyan : RoxyColors.purple)
+                            }
+                        }
+                        .listRowBackground(
+                            Group {
+                                if selectedItem == item {
+                                    RoundedRectangle(cornerRadius: RoxyCornerRadius.md)
+                                        .fill(RoxyColors.cyan.opacity(0.15))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: RoxyCornerRadius.md)
+                                                .strokeBorder(
+                                                    LinearGradient(
+                                                        colors: [RoxyColors.cyan.opacity(0.6), RoxyColors.cyan.opacity(0.2)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 1
+                                                )
+                                        )
+                                        .glow(color: RoxyColors.cyan, radius: 8)
+                                } else {
+                                    Color.clear
+                                }
+                            }
+                        )
+                    }
+                    .scrollContentBackground(.hidden)
+                    .listStyle(.sidebar)
                 }
-            }
-            .navigationTitle("Roxy")
-            .listStyle(.sidebar)
-        } detail: {
-            if let selectedItem {
-                switch selectedItem {
-                case .agent:
-                    AgentView()
-                case .settings:
-                    SettingsView()
+                .navigationTitle("")
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        GradientText(
+                            "Roxy",
+                            gradient: RoxyGradients.cyanPurple,
+                            font: RoxyFonts.title2,
+                            fontWeight: .bold,
+                            shimmer: true,
+                            shimmerDuration: 3.0
+                        )
+                    }
                 }
-            } else {
-                Text("Select an item")
-                    .foregroundColor(.secondary)
+            } detail: {
+                if let selectedItem {
+                    switch selectedItem {
+                    case .agent:
+                        AgentView()
+                    case .settings:
+                        SettingsView()
+                    }
+                } else {
+                    ZStack {
+                        GlassmorphicCard(variant: .primary) {
+                            VStack(spacing: RoxySpacing.md) {
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 48, weight: .light))
+                                    .foregroundColor(RoxyColors.cyan)
+                                    .pulsingGlow(color: RoxyColors.cyan)
+
+                                Text("Select an item")
+                                    .font(RoxyFonts.title2)
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        .frame(maxWidth: 300)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             }
         }
-        .frame(minWidth: 800, minHeight: 500) // Increased default size for better layout
+        .frame(minWidth: 800, minHeight: 500)
         .sheet(isPresented: $showPermissionView) {
             PermissionView()
         }

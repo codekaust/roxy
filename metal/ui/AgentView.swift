@@ -1,208 +1,205 @@
 import SwiftUI
 
 struct AgentView: View {
-    // 1. Existing Shared State for the Task Agent
+    // State objects
     @StateObject private var agentState = AgentState()
-
-    // 2. NEW: The Voice Agent
     @EnvironmentObject var voiceAgent: ConversationalAgent
+    @ObservedObject private var chatHistory = ChatHistoryManager.shared
 
-    // 3. Persistence & Text Input
-    @AppStorage("lastTask") private var lastTask: String = ""
-    @State private var taskInput: String = ""
-
-    // 4. Agent Reference (Lazy init)
+    // Local state
+    @State private var messageInput: String = ""
     @State private var agent: Agent?
     @State private var isAgentInitialized = false
 
-    // 5. Log Manager (for displaying logs)
-    @ObservedObject private var logManager = LogManager.shared
-    
     var body: some View {
-        VStack(spacing: 16) {
-            
-            // --- HEADER ---
-            HStack {
-                Text("Roxy")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Spacer()
+        VStack(spacing: 0) {
+            // HEADER
+            chatHeader
 
-                // STATUS INDICATOR
-                if voiceAgent.isThinking {
-                    Text("Thinking...")
-                        .foregroundColor(.orange)
-                        .font(.caption)
-                } else if voiceAgent.isListening {
-                    // Display the live caption here
-                    Text(voiceAgent.liveCaption.isEmpty ? "Listening..." : "\"\(voiceAgent.liveCaption)\"")
-                        .foregroundColor(.green)
-                        .font(.caption)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
+            // CHAT MESSAGES
+            chatScrollView
 
-                // Clear Logs Button
-                if !logManager.logs.isEmpty {
-                    Button {
-                        logManager.clear()
-                    } label: {
-                        Image(systemName: "trash")
-                            .foregroundColor(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Clear Logs")
-                }
-            }
-            
-            // --- MAIN CONTROLS ---
-            HStack(spacing: 12) {
-                
-                // A. TEXT INPUT (Classic Mode)
-                TextField("What would you like to do?", text: $taskInput)
-                    .textFieldStyle(.roundedBorder)
-                    .disabled(isRunning || voiceAgent.isListening) // Disable if busy
-                    .onSubmit { startTextAgent() }
-                
-                // B. VOICE BUTTON (New)
-                Button {
-                    toggleVoiceSession()
-                } label: {
-                    Image(systemName: voiceAgent.isListening ? "mic.fill" : "mic.slash.fill")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(voiceAgent.isListening ? .white : .primary)
-                        .padding(8)
-                        .background(voiceAgent.isListening ? Color.red : Color.gray.opacity(0.2))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .help(voiceAgent.isListening ? "Stop Listening" : "Start Voice Assistant")
-                
-                // C. START/STOP BUTTON (Text Mode)
-                if isRunning {
-                    Button(role: .destructive) {
-                        stopTextAgent()
-                    } label: {
-                        Image(systemName: "stop.fill")
-                    }
-                    .tint(.red)
-                } else {
-                    Button {
-                        startTextAgent()
-                    } label: {
-                        Image(systemName: "play.fill")
-                    }
-                    .disabled(taskInput.isEmpty)
-                }
+            // INPUT BAR (fixed at bottom)
+            ChatInputBar(
+                text: $messageInput,
+                isDisabled: isTaskRunning,
+                onSubmit: sendMessage,
+                onVoiceToggle: toggleVoice,
+                isVoiceActive: voiceAgent.isListening
+            )
+        }
+        .background(Color.black)  // Pure black OLED background
+        .onAppear(perform: initializeAgent)
+    }
+
+    // MARK: - Subviews
+
+    var chatHeader: some View {
+        HStack {
+            AIStatusVisualization(state: currentAIState)
+                .frame(width: 50, height: 50)
+
+            VStack(alignment: .leading, spacing: 4) {
+                GradientText(
+                    "Roxy",
+                    gradient: RoxyGradients.cyanPurple,
+                    font: RoxyFonts.title2,
+                    fontWeight: .bold,
+                    shimmer: true
+                )
+
+                Text(statusText)
+                    .font(RoxyFonts.caption)
+                    .foregroundColor(statusColor)
             }
 
-            Divider()
-            
-            // --- TASK LOG / OUTPUT AREA ---
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 4) {
-                        if logManager.logs.isEmpty {
-                            Text("Ready for instructions.")
-                                .foregroundColor(.secondary)
-                                .padding()
-                        } else {
-                            ForEach(logManager.logs) { logEntry in
-                                Text(logEntry.formattedMessage)
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundColor(colorForLogLevel(logEntry.level))
-                                    .textSelection(.enabled)
-                                    .id(logEntry.id)
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                }
-                .background(Color(nsColor: .textBackgroundColor))
-                .cornerRadius(8)
-                .onChange(of: logManager.logs.count) {
-                    // Auto-scroll to bottom when new logs arrive
-                    if let lastLog = logManager.logs.last {
-                        withAnimation {
-                            proxy.scrollTo(lastLog.id, anchor: .bottom)
-                        }
-                    }
+            Spacer()
+
+            if !chatHistory.messages.isEmpty {
+                FuturisticButton(
+                    icon: "trash",
+                    variant: .iconOnly,
+                    size: .small
+                ) {
+                    clearChat()
                 }
             }
         }
-        .padding()
-        .onAppear {
-            // Init the Task Agent (used by both Text & Voice logic)
-            if !isAgentInitialized {
-                agentState.nSteps = 0
-                agentState.stopped = true
-                self.agent = Agent(state: agentState)
-                isAgentInitialized = true
+        .padding(RoxySpacing.md)
+        .darkGlassEffect(
+            tint: RoxyColors.neonPurple,
+            neonBorder: RoxyGradients.neonBorderMagenta,
+            opacity: 0.2
+        )
+    }
+
+    var chatScrollView: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: RoxySpacing.md) {
+                    if chatHistory.messages.isEmpty {
+                        emptyState
+                    } else {
+                        ForEach(chatHistory.messages) { message in
+                            ChatBubble(message: message)
+                                .id(message.id)
+                        }
+                    }
+                }
+                .padding(RoxySpacing.md)
+            }
+            .onChange(of: chatHistory.messages.count) {
+                if let lastMessage = chatHistory.messages.last {
+                    withAnimation(RoxyAnimation.smoothSpring) {
+                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                    }
+                }
             }
         }
     }
-    
+
+    var emptyState: some View {
+        VStack(spacing: RoxySpacing.lg) {
+            ThinkingParticles()
+                .frame(height: 120)
+
+            GradientText(
+                "Ready to assist",
+                gradient: RoxyGradients.cyanPurple,
+                font: RoxyFonts.title3,
+                fontWeight: .semibold
+            )
+
+            Text("Send a message or use voice to start")
+                .font(RoxyFonts.body)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(RoxySpacing.xl)
+    }
+
     // MARK: - Computed Properties
-    
-    var isRunning: Bool {
-        return agentState.nSteps > 0 && !agentState.stopped
+
+    var isTaskRunning: Bool {
+        agentState.nSteps > 0 && !agentState.stopped
     }
-    
-    // MARK: - Voice Logic
-    
-    func toggleVoiceSession() {
+
+    var currentAIState: AIStatusVisualization.AIState {
+        if voiceAgent.isListening {
+            return .listening
+        } else if isTaskRunning {
+            return .thinking
+        } else {
+            return .idle
+        }
+    }
+
+    var statusText: String {
+        if voiceAgent.isListening {
+            return voiceAgent.liveCaption.isEmpty ? "Listening..." : "\"\(voiceAgent.liveCaption)\""
+        } else if isTaskRunning {
+            return "Working on it..."
+        } else {
+            return "Ready"
+        }
+    }
+
+    var statusColor: Color {
+        if voiceAgent.isListening {
+            return RoxyColors.listening
+        } else if isTaskRunning {
+            return RoxyColors.thinking
+        } else {
+            return RoxyColors.idle
+        }
+    }
+
+    // MARK: - Actions
+
+    func sendMessage() {
+        guard !messageInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return
+        }
+
+        let text = messageInput
+        messageInput = ""
+
+        // Add user message to chat
+        chatHistory.addUserMessage(text)
+
+        // Start AI response
+        chatHistory.startAIResponse(initialLog: "Processing your request...")
+
+        // Start agent
+        agentState.nSteps = 0
+        agentState.stopped = false
+        agent?.start(task: text)
+    }
+
+    func toggleVoice() {
         if voiceAgent.isListening {
             voiceAgent.stopSession()
         } else {
-            // Stop text agent if running to avoid conflicts
-            if isRunning { stopTextAgent() }
+            if isTaskRunning {
+                agent?.stop()
+            }
             voiceAgent.startSession()
         }
     }
-    
-    // MARK: - Text Logic
-    
-    func startTextAgent() {
-        // Stop voice if active
-        if voiceAgent.isListening { voiceAgent.stopSession() }
-        
-        guard !taskInput.isEmpty else { return }
-        
-        lastTask = taskInput
-        agentState.nSteps = 0
-        agentState.stopped = false
-        agent?.start(task: taskInput)
-    }
-    
-    func stopTextAgent() {
-        agent?.stop()
+
+    func clearChat() {
+        withAnimation(RoxyAnimation.spring) {
+            chatHistory.clear()
+            LogManager.shared.clear()
+        }
     }
 
-    // MARK: - Helper Functions
-
-    func colorForLogLevel(_ level: LogEntry.LogLevel) -> Color {
-        switch level {
-        case .debug:
-            return .secondary
-        case .info:
-            return .primary
-        case .success:
-            return .green
-        case .warning:
-            return .orange
-        case .error:
-            return .red
-        case .thinking:
-            return .blue
-        case .sensing:
-            return .cyan
-        case .acting:
-            return .purple
-        case .goal:
-            return .mint
+    func initializeAgent() {
+        if !isAgentInitialized {
+            agentState.nSteps = 0
+            agentState.stopped = true
+            self.agent = Agent(state: agentState)
+            isAgentInitialized = true
         }
     }
 }

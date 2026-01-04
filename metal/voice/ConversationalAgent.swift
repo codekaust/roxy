@@ -186,6 +186,15 @@ class ConversationalAgent: ObservableObject {
         }
 
         LogManager.shared.info("ConversationalAgent: Starting Task Agent with instruction: \(decision.instruction)")
+
+        // Add to chat history
+        DispatchQueue.main.async {
+            ChatHistoryManager.shared.addUserMessage(decision.instruction)
+            ChatHistoryManager.shared.startAIResponse(
+                initialLog: "Processing voice command: \(decision.instruction)"
+            )
+        }
+
         await ttsManager.speak(decision.safeReply)
         taskAgent.start(task: decision.instruction)
     }

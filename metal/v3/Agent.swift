@@ -115,10 +115,24 @@ class Agent {
 
                 LogManager.shared.info("  -> \(res.longTermMemory ?? res.error ?? "Done")")
 
-                if res.error != nil { break } // Stop step on error
+                if res.error != nil {
+                    // Notify chat history of error
+                    DispatchQueue.main.async {
+                        ChatHistoryManager.shared.markAIResponseAsError(
+                            errorMessage: "Task failed: \(res.error ?? "Unknown error")"
+                        )
+                    }
+                    break // Stop step on error
+                }
                 if res.isDone == true {
                     DispatchQueue.main.async { self.state.stopped = true }
                     LogManager.shared.success("Task Done!")
+                    // Notify chat history of completion
+                    DispatchQueue.main.async {
+                        ChatHistoryManager.shared.completeAIResponse(
+                            finalMessage: "Task completed successfully!"
+                        )
+                    }
                 }
             }
             
