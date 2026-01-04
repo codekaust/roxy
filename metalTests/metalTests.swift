@@ -1,10 +1,3 @@
-//
-//  metalTests.swift
-//  metalTests
-//
-//  Created by Ayush on 20/12/25.
-//
-
 import Testing
 @testable import metal
 

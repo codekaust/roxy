@@ -1,65 +1,69 @@
-//
-//  VoiceGeminiApi.swift
-//  metal
-//
-//  Created by Ayush on 26/12/25.
-//
-
 import Foundation
 
-// MARK: - Voice Proxy Models (Private & Separate)
-// We duplicate these so this file is fully independent of the main GeminiApi.
-private struct VoiceProxyRequestPart: Codable {
+// MARK: - Gemini API Request Models (Voice)
+private struct VoiceGeminiRequestPart: Codable {
     let text: String
 }
 
-private struct VoiceProxyRequestMessage: Codable {
+private struct VoiceGeminiRequestContent: Codable {
     let role: String
-    let parts: [VoiceProxyRequestPart]
+    let parts: [VoiceGeminiRequestPart]
 }
 
-private struct VoiceProxyRequestBody: Codable {
-    let modelName: String
-    let messages: [VoiceProxyRequestMessage]
+private struct VoiceGeminiRequestBody: Codable {
+    let contents: [VoiceGeminiRequestContent]
+}
+
+// MARK: - Gemini API Response Models (Voice)
+private struct VoiceGeminiCandidate: Codable {
+    let content: VoiceGeminiContent
+}
+
+private struct VoiceGeminiContent: Codable {
+    let parts: [VoiceGeminiPart]
+}
+
+private struct VoiceGeminiPart: Codable {
+    let text: String?
+}
+
+private struct VoiceGeminiResponse: Codable {
+    let candidates: [VoiceGeminiCandidate]?
 }
 
 // MARK: - Voice API Client
 class VoiceGeminiApi {
     private let modelName: String
     private let maxRetry: Int
-    
-    // --- CONFIGURATION FOR VOICE ---
-    // You can change these independently of the main agent
-    private let proxyUrl = "https://us-central1-panda-465116.cloudfunctions.net/gemini-proxy-service"
-    private let proxyKey = "ayushissupercoolpersonandifyouknowthiskeyyouareabeliever"
-    // -------------------------------
-    
+    private let apiKey: String
+
     private let session: URLSession
     private let decoder: JSONDecoder
-    
-    init(modelName: String = "gemini-3-flash-preview", maxRetry: Int = 3) {
+
+    init(modelName: String = "gemini-3-flash-preview", apiKey: String, maxRetry: Int = 3) {
         self.modelName = modelName
+        self.apiKey = apiKey
         self.maxRetry = maxRetry
-        
+
         let config = URLSessionConfiguration.default
         // Voice needs to be snappy; we set a shorter timeout than the main agent
         config.timeoutIntervalForRequest = 15 // 15 seconds limit for voice
         self.session = URLSession(configuration: config)
-        
+
         self.decoder = JSONDecoder()
     }
-    
+
     /// Generic Generation Function
     func generate<T: Codable>(messages: [GeminiMessage]) async -> T? {
         let jsonResponse = await retryWithBackoff(times: maxRetry) {
-            return try await self.performProxyApiCall(messages: messages)
+            return try await self.performGeminiApiCall(messages: messages)
         }
-        
+
         guard let jsonString = jsonResponse else {
             print("VoiceGeminiApi: Failed to get response after \(maxRetry) retries.")
             return nil
         }
-        
+
         do {
             guard let data = jsonString.data(using: .utf8) else { return nil }
             return try decoder.decode(T.self, from: data)
@@ -69,48 +73,61 @@ class VoiceGeminiApi {
             return nil
         }
     }
-    
+
     // MARK: - Network Logic
-    private func performProxyApiCall(messages: [GeminiMessage]) async throws -> String {
-        guard let url = URL(string: proxyUrl) else { throw URLError(.badURL) }
-        
-        // Map to Voice DTOs
-        let proxyMessages = messages.map { msg in
-            VoiceProxyRequestMessage(
+    private func performGeminiApiCall(messages: [GeminiMessage]) async throws -> String {
+        let urlString = "https://generativelanguage.googleapis.com/v1beta/models/\(modelName):generateContent?key=\(apiKey)"
+
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        // Map to Gemini API Format
+        let geminiContents = messages.map { msg in
+            return VoiceGeminiRequestContent(
                 role: msg.role.rawValue,
                 parts: msg.parts.compactMap { part in
                     switch part {
-                    case .text(let t): return VoiceProxyRequestPart(text: t)
+                    case .text(let t): return VoiceGeminiRequestPart(text: t)
                     }
                 }
             )
         }
-        
-        let payload = VoiceProxyRequestBody(modelName: modelName, messages: proxyMessages)
+
+        let payload = VoiceGeminiRequestBody(contents: geminiContents)
         let jsonData = try JSONEncoder().encode(payload)
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = jsonData
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue(proxyKey, forHTTPHeaderField: "X-API-Key")
-        
+
         let (data, response) = try await session.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
-        
-        guard let responseString = String(data: data, encoding: .utf8) else {
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let errorBody = String(data: data, encoding: .utf8) ?? "No body"
+            print("VoiceGeminiApi: API Error \(httpResponse.statusCode): \(errorBody)")
+            throw URLError(.badServerResponse)
+        }
+
+        // Parse Gemini Response
+        let geminiResponse = try decoder.decode(VoiceGeminiResponse.self, from: data)
+
+        guard let candidate = geminiResponse.candidates?.first,
+              let textPart = candidate.content.parts.first?.text else {
             throw URLError(.cannotDecodeContentData)
         }
-        
-        return responseString
+
+        return textPart
     }
-    
+
     private func retryWithBackoff<T>(times: Int, operation: () async throws -> T) async -> T? {
         var currentDelay: UInt64 = 500_000_000 // Start with 0.5s for voice
-        
+
         for attempt in 1...times {
             do {
                 return try await operation()

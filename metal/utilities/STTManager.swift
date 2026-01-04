@@ -1,10 +1,3 @@
-//
-//  STTManager.swift
-//  metal
-//
-//  Created by Ayush on 23/12/25.
-//
-
 import Foundation
 import Speech
 import AVFoundation

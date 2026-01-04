@@ -1,10 +1,3 @@
-//
-//  UserMessageBuilder.swift
-//  metal
-//
-//  Created by Ayush on 22/12/25.
-//
-
 import Foundation
 
 struct UserMessageBuilder {

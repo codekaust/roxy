@@ -1,10 +1,3 @@
-//
-//  metalApp.swift
-//  metal
-//
-//  Created by Ayush on 20/12/25.
-//
-
 import SwiftUI
 import AudioToolbox
 import Combine

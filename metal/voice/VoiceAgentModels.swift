@@ -1,10 +1,3 @@
-//
-//  VoiceAgentModels.swift
-//  metal
-//
-//  Created by Ayush on 26/12/25.
-//
-
 import Foundation
 
 // Mirrors the Kotlin 'ModelDecision' data class

@@ -1,10 +1,3 @@
-//
-//  HotkeyManager.swift
-//  metal
-//
-//  Created by Ayush on 27/12/25.
-//
-
 import AppKit
 import Carbon
 

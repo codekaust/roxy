@@ -1,10 +1,3 @@
-//
-//  SettingsView.swift
-//  metal
-//
-//  Created by Ayush on 22/12/25.
-//
-
 import SwiftUI
 
 struct SettingsView: View {
@@ -111,23 +104,15 @@ struct SettingsView: View {
                 }
             }
             Section(header: Text("Voice Settings")) {
-                            Toggle(isOn: $ttsManager.useCloudTTS) {
-                                VStack(alignment: .leading) {
-                                    Text("Use Cloud TTS")
-                                        .font(.headline)
-                                    Text("High quality, requires internet & API Key.")
-                                        .font(.caption).foregroundColor(.secondary)
-                                }
-                            }
-                            
-                            if ttsManager.useCloudTTS {
-                                SecureField("Google Cloud API Key", text: $ttsManager.googleApiKey)
-                                    .textFieldStyle(.roundedBorder)
-                                
-                                Text("Requires Cloud Text-to-Speech API enabled.")
-                                    .font(.caption2).foregroundColor(.gray)
-                            }
-                        }
+                Toggle(isOn: $ttsManager.useCloudTTS) {
+                    VStack(alignment: .leading) {
+                        Text("Use Cloud TTS")
+                            .font(.headline)
+                        Text("High quality voice using Google Cloud Text-to-Speech (requires internet).")
+                            .font(.caption).foregroundColor(.secondary)
+                    }
+                }
+            }
             
         }
         .padding()

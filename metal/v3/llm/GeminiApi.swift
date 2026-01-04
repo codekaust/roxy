@@ -1,60 +1,64 @@
-//
-//  GeminiApi.swift
-//  metal
-//
-//  Created by Ayush on 22/12/25.
-//
-
 import Foundation
 
-// MARK: - Proxy Request Models (Internal)
-// These match the JSON structure your Cloud Function expects
-private struct ProxyRequestPart: Codable {
+// MARK: - Gemini API Request Models
+private struct GeminiRequestPart: Codable {
     let text: String
 }
 
-private struct ProxyRequestMessage: Codable {
+private struct GeminiRequestContent: Codable {
     let role: String
-    let parts: [ProxyRequestPart]
+    let parts: [GeminiRequestPart]
 }
 
-private struct ProxyRequestBody: Codable {
-    let modelName: String
-    let messages: [ProxyRequestMessage]
+private struct GeminiRequestBody: Codable {
+    let contents: [GeminiRequestContent]
+}
+
+// MARK: - Gemini API Response Models
+private struct GeminiCandidate: Codable {
+    let content: GeminiContent
+}
+
+private struct GeminiContent: Codable {
+    let parts: [GeminiPart]
+}
+
+private struct GeminiPart: Codable {
+    let text: String?
+}
+
+private struct GeminiResponse: Codable {
+    let candidates: [GeminiCandidate]?
 }
 
 // MARK: - Gemini API Client
 class GeminiApi {
     private let modelName: String
     private let maxRetry: Int
-    
-    // Hardcoded for now, or load from a Config/plist
-    private let proxyUrl = "https://us-central1-panda-465116.cloudfunctions.net/gemini-proxy-service"
-    private let proxyKey = "ayushissupercoolpersonandifyouknowthiskeyyouareabeliever"
-    
+    private let apiKey: String
+
     private let session: URLSession
     private let decoder: JSONDecoder
-    
-    init(modelName: String, maxRetry: Int = 3) {
+
+    init(modelName: String, apiKey: String, maxRetry: Int = 3) {
         self.modelName = modelName
+        self.apiKey = apiKey
         self.maxRetry = maxRetry
-        
+
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 60 // 60 seconds
         self.session = URLSession(configuration: config)
-        
+
         self.decoder = JSONDecoder()
-        // Allow flexible JSON parsing similar to Kotlin's 'ignoreUnknownKeys'
-        // Swift ignores unknown keys by default unless you explicitly define them in CodingKeys
     }
-    
-    /// Primary Entry Point: Generates AgentOutput from the Proxy
+
+    /// Primary Entry Point: Generates AgentOutput from Gemini API
     func generateAgentOutput(messages: [GeminiMessage]) async -> AgentOutput? {
         // Retry Wrapper
         let jsonResponse = await retryWithBackoff(times: maxRetry) {
-            return try await self.performProxyApiCall(messages: messages)
+            return try await self.performGeminiApiCall(messages: messages)
         }
-        
+
         guard let jsonString = jsonResponse else {
             LogManager.shared.error("GeminiApi: Failed to get response after \(maxRetry) retries.")
             return nil
@@ -64,7 +68,6 @@ class GeminiApi {
         do {
             LogManager.shared.debug("GeminiApi: Received JSON length: \(jsonString.count)")
 
-            // The proxy returns a String body. We need to convert that String -> Data -> Object
             guard let data = jsonString.data(using: .utf8) else { return nil }
 
             let output = try decoder.decode(AgentOutput.self, from: data)
@@ -76,56 +79,61 @@ class GeminiApi {
             return nil
         }
     }
-    
-    /// Performs the actual Network Request
-    private func performProxyApiCall(messages: [GeminiMessage]) async throws -> String {
-        guard let url = URL(string: proxyUrl) else {
+
+    /// Performs the actual Network Request to Gemini API
+    private func performGeminiApiCall(messages: [GeminiMessage]) async throws -> String {
+        let urlString = "https://generativelanguage.googleapis.com/v1beta/models/\(modelName):generateContent?key=\(apiKey)"
+
+        guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }
-        
-        // 1. Map Internal Messages -> Proxy DTOs
-        let proxyMessages = messages.map { msg in
-            ProxyRequestMessage(
+
+        // 1. Map Internal Messages -> Gemini API Format
+        let geminiContents = messages.map { msg in
+            return GeminiRequestContent(
                 role: msg.role.rawValue,
                 parts: msg.parts.compactMap { part in
                     switch part {
-                    case .text(let t): return ProxyRequestPart(text: t)
+                    case .text(let t): return GeminiRequestPart(text: t)
                     }
                 }
             )
         }
-        
+
         // 2. Build Request Body
-        let payload = ProxyRequestBody(modelName: modelName, messages: proxyMessages)
+        let payload = GeminiRequestBody(contents: geminiContents)
         let jsonData = try JSONEncoder().encode(payload)
-        
+
         // 3. Configure Request
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = jsonData
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue(proxyKey, forHTTPHeaderField: "X-API-Key")
-        
+
         // 4. Execute
         let (data, response) = try await session.data(for: request)
-        
+
         guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
-        
+
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorBody = String(data: data, encoding: .utf8) ?? "No body"
-            LogManager.shared.error("GeminiApi: Proxy Error \(httpResponse.statusCode): \(errorBody)")
+            LogManager.shared.error("GeminiApi: API Error \(httpResponse.statusCode): \(errorBody)")
             throw URLError(.badServerResponse)
         }
-        
-        guard let responseString = String(data: data, encoding: .utf8) else {
+
+        // 5. Parse Gemini Response
+        let geminiResponse = try decoder.decode(GeminiResponse.self, from: data)
+
+        guard let candidate = geminiResponse.candidates?.first,
+              let textPart = candidate.content.parts.first?.text else {
             throw URLError(.cannotDecodeContentData)
         }
-        
-        return responseString
+
+        return textPart
     }
-    
+
     /// Exponential Backoff Retry Logic
     private func retryWithBackoff<T>(
         times: Int,
@@ -134,9 +142,9 @@ class GeminiApi {
         factor: Double = 2.0,
         operation: () async throws -> T
     ) async -> T? {
-        
+
         var currentDelay = initialDelay
-        
+
         for attempt in 1...times {
             do {
                 return try await operation()

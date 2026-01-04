@@ -1,10 +1,3 @@
-//
-//  HistoryItem.swift
-//  metal
-//
-//  Created by Ayush on 22/12/25.
-//
-
 import Foundation
 
 // Represents a single item in the agent's high-level history summary.

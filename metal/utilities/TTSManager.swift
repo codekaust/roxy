@@ -1,24 +1,15 @@
-//
-//  TTSManager.swift
-//  metal
-//
-//  Created by Ayush on 23/12/25.
-//
-
 import Foundation
 import AVFoundation // Replaces AppKit for TTS
 import CryptoKit
 
 class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAudioPlayerDelegate {
-    
+
     static let shared = TTSManager()
-    private let defaultApiKey = "AIzaSyD5nftGCHxOFTAC08TJFQ-kR7JSOw5UgE0"
+    private let googleApiKey = "AIzaSyBAPzvrfZF0_aPS7FkoynkdxmuP_cQcwWc"
+
     // --- Configuration ---
     @Published var useCloudTTS: Bool {
         didSet { UserDefaults.standard.set(useCloudTTS, forKey: "useCloudTTS") }
-    }
-    @Published var googleApiKey: String {
-        didSet { UserDefaults.standard.set(googleApiKey, forKey: "googleApiKey") }
     }
     
     private var speechContinuation: CheckedContinuation<Void, Never>?
@@ -39,15 +30,6 @@ class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, AVAud
     
     override init() {
         self.useCloudTTS = UserDefaults.standard.object(forKey: "useCloudTTS") == nil ? true : UserDefaults.standard.bool(forKey: "useCloudTTS")
-        let savedKey = UserDefaults.standard.string(forKey: "googleApiKey")
-        // self.googleApiKey = UserDefaults.standard.string(forKey: "googleApiKey") ?? ""
-        if let key = savedKey, !key.isEmpty {
-            // User has manually entered a key previously
-            self.googleApiKey = key
-        } else {
-            // First run (or user cleared it): Use your hardcoded default
-            self.googleApiKey = defaultApiKey
-        }
         super.init()
         nativeSynth.delegate = self
         setupCache()

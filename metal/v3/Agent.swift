@@ -1,10 +1,3 @@
-//
-//  Agent.swift
-//  metal
-//
-//  Created by Ayush on 22/12/25.
-//
-
 import Foundation
 import SwiftUI
 
@@ -16,8 +9,12 @@ class Agent {
     private let actionExecutor: ActionExecutor
     private let fileSystem: FileSystem
     
-    // We need an LLM Client (Placeholder for now)
-    private let llmClient = GeminiApi(modelName: "gemini-3-flash-preview") // Replace with real Gemini/OpenAI client
+    // We need an LLM Client
+    // TODO: Move API key to secure storage or Settings
+    private let llmClient = GeminiApi(
+        modelName: "gemini-3-flash-preview",
+        apiKey: "AIzaSyBAPzvrfZF0_aPS7FkoynkdxmuP_cQcwWc"
+    )
     
     // Observable State (Published to SwiftUI)
     private var state: AgentState

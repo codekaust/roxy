@@ -1,10 +1,3 @@
-//
-//  A11yNode.swift
-//  metal
-//
-//  Created by Ayush on 21/12/25.
-//
-
 import Foundation
 
 struct A11yNode: Identifiable, Codable {

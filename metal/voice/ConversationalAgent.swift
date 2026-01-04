@@ -1,10 +1,3 @@
-//
-//  ConversationalAgent.swift
-//  metal
-//
-//  Created by Ayush on 26/12/25.
-//
-
 import Foundation
 import SwiftUI
 import Combine // 1. Import Combine
@@ -19,7 +12,10 @@ class ConversationalAgent: ObservableObject {
     let sttManager = STTManager()
     private let ttsManager = TTSManager.shared
     private let perception = Perception()
-    private let llmClient = VoiceGeminiApi(modelName: "gemini-3-flash-preview")
+    private let llmClient = VoiceGeminiApi(
+        modelName: "gemini-3-flash-preview",
+        apiKey: "AIzaSyBAPzvrfZF0_aPS7FkoynkdxmuP_cQcwWc"
+    )
     
     // The "Task Executor" Agent
     private let taskAgentState = AgentState()
